@@ -84,3 +84,4 @@ export interface ExecuteOptions {
 }
 
 export { LocalProvider } from "./local"
+export { ModalProvider, type ModalConfig } from "./modal"

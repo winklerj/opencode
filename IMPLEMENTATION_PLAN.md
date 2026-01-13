@@ -11,7 +11,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 |------|--------|------|-------|
 | Provider interface definition | complete | HostedAgent.tla | Base interface for sandbox backends |
 | Local provider implementation | complete | - | Dev/test fallback with tests |
-| Modal provider implementation | pending | - | Production backend |
+| Modal provider implementation | complete | - | Production backend with API integration |
 | Warm pool manager | complete | WarmPool.tla | Pool lifecycle with claim/release |
 | Warm pool warmup (typing trigger) | complete | WarmPool.tla | onTyping() hook for warmup |
 | Image builder | pending | - | 30-min rebuild cycle |
@@ -250,3 +250,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | use_skill tool | complete | Already implemented via SkillTool |
 | 2026-01-13 | computer_use tool | complete | ComputerUseTool for desktop interaction (screenshot, click, type, key, scroll, move) |
 | 2026-01-13 | Plugin Hooks | complete | Added 14 hosted agent hooks to plugin package and integrated triggers in services |
+| 2026-01-13 | Modal provider implementation | complete | ModalProvider with API integration, lifecycle management, snapshot/restore, git sync |
