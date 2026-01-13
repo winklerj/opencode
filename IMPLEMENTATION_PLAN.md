@@ -9,8 +9,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 1.1 Sandbox Package (`packages/sandbox/`)
 | Task | Status | TLA+ | Notes |
 |------|--------|------|-------|
-| Provider interface definition | pending | HostedAgent.tla | Base interface for sandbox backends |
-| Local provider implementation | pending | - | Dev/test fallback |
+| Provider interface definition | complete | HostedAgent.tla | Base interface for sandbox backends |
+| Local provider implementation | complete | - | Dev/test fallback with tests |
 | Modal provider implementation | pending | - | Production backend |
 | Warm pool manager | pending | WarmPool.tla | Pool lifecycle management |
 | Warm pool warmup (typing trigger) | pending | WarmPool.tla | Claim on keystroke |
@@ -186,4 +186,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Date | Task | Status | Notes |
 |------|------|--------|-------|
-| - | - | - | No changes yet |
+| 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
+| 2026-01-13 | Local provider implementation | complete | Full provider with tests |
