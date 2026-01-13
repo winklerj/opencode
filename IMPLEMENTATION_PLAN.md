@@ -16,7 +16,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Warm pool warmup (typing trigger) | complete | WarmPool.tla | onTyping() hook for warmup |
 | Image builder | pending | - | 30-min rebuild cycle |
 | Image registry | pending | - | Tagging strategy |
-| Snapshot manager | pending | SandboxSnapshot.tla | Create/restore snapshots |
+| Snapshot manager | complete | SandboxSnapshot.tla | SnapshotManager with TTL expiration |
 | Git sync gating | complete | GitSyncGating.tla | SyncGate blocks writes until synced |
 
 ### 1.2 Background Agent Package (`packages/background/`)
@@ -194,3 +194,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Spawner | complete | AgentSpawner with valid status transitions and lifecycle events |
 | 2026-01-13 | Scheduler | complete | AgentScheduler with maxConcurrent, maxQueued, maxPerSession limits |
 | 2026-01-13 | Status tracking | complete | Agent types, VALID_TRANSITIONS, isTerminal helper |
+| 2026-01-13 | Snapshot manager | complete | SnapshotManager with create/restore/expire/cleanup |
