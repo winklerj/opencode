@@ -14,8 +14,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Modal provider implementation | complete | - | Production backend with API integration |
 | Warm pool manager | complete | WarmPool.tla | Pool lifecycle with claim/release |
 | Warm pool warmup (typing trigger) | complete | WarmPool.tla | onTyping() hook for warmup |
-| Image builder | pending | - | 30-min rebuild cycle |
-| Image registry | pending | - | Tagging strategy |
+| Image builder | complete | - | 30-min rebuild cycle, parallel builds, event emission |
+| Image registry | complete | - | Tagging strategy with latest tracking, cleanup, stats |
 | Snapshot manager | complete | SandboxSnapshot.tla | SnapshotManager with TTL expiration |
 | Git sync gating | complete | GitSyncGating.tla | SyncGate blocks writes until synced |
 
@@ -252,3 +252,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Plugin Hooks | complete | Added 14 hosted agent hooks to plugin package and integrated triggers in services |
 | 2026-01-13 | Modal provider implementation | complete | ModalProvider with API integration, lifecycle management, snapshot/restore, git sync |
 | 2026-01-13 | Skills System package | complete | SkillsRegistry, SkillsLoader, SkillsExecutor with 5 built-in skills and 58 tests |
+| 2026-01-13 | Image builder | complete | ImageBuilder with scheduled rebuilds, parallel builds, event emission, job management |
+| 2026-01-13 | Image registry | complete | ImageRegistry with tagging strategy, latest tracking, cleanup, stats, 49 tests |
