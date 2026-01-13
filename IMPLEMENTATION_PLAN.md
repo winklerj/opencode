@@ -23,9 +23,9 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Task | Status | TLA+ | Notes |
 |------|--------|------|-------|
 | Queue implementation | complete | PromptQueue.tla | PromptQueue with priority ordering |
-| Scheduler | pending | - | Resource scheduling |
-| Spawner | pending | HostedAgent.tla | Sub-agent spawning |
-| Status tracking | pending | HostedAgent.tla | Agent lifecycle |
+| Scheduler | complete | HostedAgent.tla | AgentScheduler with resource limits |
+| Spawner | complete | HostedAgent.tla | AgentSpawner with lifecycle management |
+| Status tracking | complete | HostedAgent.tla | Valid status transitions enforced |
 
 ### 1.3 Multiplayer Package (`packages/multiplayer/`)
 | Task | Status | TLA+ | Notes |
@@ -190,3 +190,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Local provider implementation | complete | Full provider with tests |
 | 2026-01-13 | Warm pool manager | complete | WarmPoolManager with claim/release/warm/onTyping |
 | 2026-01-13 | Git sync gating | complete | SyncGate with read/write tool classification |
+| 2026-01-13 | Queue implementation | complete | PromptQueue with priority ordering and user-scoped ops |
+| 2026-01-13 | Spawner | complete | AgentSpawner with valid status transitions and lifecycle events |
+| 2026-01-13 | Scheduler | complete | AgentScheduler with maxConcurrent, maxQueued, maxPerSession limits |
+| 2026-01-13 | Status tracking | complete | Agent types, VALID_TRANSITIONS, isTerminal helper |
