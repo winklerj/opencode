@@ -22,7 +22,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 1.2 Background Agent Package (`packages/background/`)
 | Task | Status | TLA+ | Notes |
 |------|--------|------|-------|
-| Queue implementation | pending | PromptQueue.tla | Prompt queuing system |
+| Queue implementation | complete | PromptQueue.tla | PromptQueue with priority ordering |
 | Scheduler | pending | - | Resource scheduling |
 | Spawner | pending | HostedAgent.tla | Sub-agent spawning |
 | Status tracking | pending | HostedAgent.tla | Agent lifecycle |
