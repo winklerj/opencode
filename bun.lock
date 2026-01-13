@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "opencode",
@@ -66,6 +65,17 @@
         "vite": "catalog:",
         "vite-plugin-icons-spritesheet": "3.0.1",
         "vite-plugin-solid": "catalog:",
+      },
+    },
+    "packages/background": {
+      "name": "@opencode-ai/background",
+      "version": "0.0.1",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/console/app": {
@@ -246,6 +256,17 @@
         "typescript": "catalog:",
       },
     },
+    "packages/multiplayer": {
+      "name": "@opencode-ai/multiplayer",
+      "version": "0.0.1",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/opencode": {
       "name": "opencode",
       "version": "1.1.15",
@@ -282,6 +303,7 @@
         "@octokit/graphql": "9.0.2",
         "@octokit/rest": "catalog:",
         "@openauthjs/openauth": "catalog:",
+        "@opencode-ai/background": "workspace:*",
         "@opencode-ai/plugin": "workspace:*",
         "@opencode-ai/script": "workspace:*",
         "@opencode-ai/sdk": "workspace:*",
@@ -363,6 +385,17 @@
         "typescript": "catalog:",
       },
     },
+    "packages/sandbox": {
+      "name": "@opencode-ai/sandbox",
+      "version": "0.0.1",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/script": {
       "name": "@opencode-ai/script",
       "devDependencies": {
@@ -377,6 +410,17 @@
         "@tsconfig/node22": "catalog:",
         "@types/node": "catalog:",
         "@typescript/native-preview": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/skills": {
+      "name": "@opencode-ai/skills",
+      "version": "0.0.1",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -1168,6 +1212,8 @@
 
     "@opencode-ai/app": ["@opencode-ai/app@workspace:packages/app"],
 
+    "@opencode-ai/background": ["@opencode-ai/background@workspace:packages/background"],
+
     "@opencode-ai/console-app": ["@opencode-ai/console-app@workspace:packages/console/app"],
 
     "@opencode-ai/console-core": ["@opencode-ai/console-core@workspace:packages/console/core"],
@@ -1184,11 +1230,17 @@
 
     "@opencode-ai/function": ["@opencode-ai/function@workspace:packages/function"],
 
+    "@opencode-ai/multiplayer": ["@opencode-ai/multiplayer@workspace:packages/multiplayer"],
+
     "@opencode-ai/plugin": ["@opencode-ai/plugin@workspace:packages/plugin"],
+
+    "@opencode-ai/sandbox": ["@opencode-ai/sandbox@workspace:packages/sandbox"],
 
     "@opencode-ai/script": ["@opencode-ai/script@workspace:packages/script"],
 
     "@opencode-ai/sdk": ["@opencode-ai/sdk@workspace:packages/sdk/js"],
+
+    "@opencode-ai/skills": ["@opencode-ai/skills@workspace:packages/skills"],
 
     "@opencode-ai/slack": ["@opencode-ai/slack@workspace:packages/slack"],
 

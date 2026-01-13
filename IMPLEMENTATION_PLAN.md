@@ -201,14 +201,14 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Skills registry | pending | packages/skills/ |
-| Skills loader | pending | Load from .opencode/skills/ |
-| Skills executor | pending | Context injection |
-| Built-in: code-review | pending | - |
-| Built-in: pr-description | pending | - |
-| Built-in: test-generation | pending | - |
-| Built-in: bug-fix | pending | - |
-| Built-in: feature-impl | pending | - |
+| Skills registry | complete | SkillsRegistry with CRUD, category/builtin filtering |
+| Skills loader | complete | SkillsLoader for markdown files with YAML frontmatter |
+| Skills executor | complete | SkillsExecutor with prepare/invoke and event emission |
+| Built-in: code-review | complete | Review skill with security, quality, performance checks |
+| Built-in: pr-description | complete | PR generation with summary, testing, screenshots |
+| Built-in: test-generation | complete | Test creation following project patterns |
+| Built-in: bug-fix | complete | Systematic debugging and root cause analysis |
+| Built-in: feature-impl | complete | Feature implementation with architecture patterns |
 
 ---
 
@@ -251,3 +251,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | computer_use tool | complete | ComputerUseTool for desktop interaction (screenshot, click, type, key, scroll, move) |
 | 2026-01-13 | Plugin Hooks | complete | Added 14 hosted agent hooks to plugin package and integrated triggers in services |
 | 2026-01-13 | Modal provider implementation | complete | ModalProvider with API integration, lifecycle management, snapshot/restore, git sync |
+| 2026-01-13 | Skills System package | complete | SkillsRegistry, SkillsLoader, SkillsExecutor with 5 built-in skills and 58 tests |
