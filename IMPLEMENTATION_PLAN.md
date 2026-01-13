@@ -35,7 +35,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Edit locks | complete | HostedAgent.tla | Single writer guarantee with acquire/release |
 | Client management | complete | HostedAgent.tla | Multi-client per user with limits |
 | Durable Object state | pending | HostedAgent.tla | Cloudflare DO integration |
-| SQLite state fallback | pending | - | Local/memory fallback |
+| SQLite state fallback | complete | - | StateStore interface with SQLiteStateStore and MemoryStateStore |
 | WebSocket sync | complete | - | Real-time updates via /multiplayer/:id/ws |
 | Conflict resolution | complete | - | ConflictResolver with strategies (last-write-wins, reject, merge) |
 
@@ -255,3 +255,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Image builder | complete | ImageBuilder with scheduled rebuilds, parallel builds, event emission, job management |
 | 2026-01-13 | Image registry | complete | ImageRegistry with tagging strategy, latest tracking, cleanup, stats, 49 tests |
 | 2026-01-13 | Conflict resolution | complete | ConflictResolver with 3 strategies, OptimisticUpdater for client-side, 74 tests |
+| 2026-01-13 | SQLite state fallback | complete | StateStore interface, SQLiteStateStore with persistence, MemoryStateStore, 43 tests |
