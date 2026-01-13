@@ -450,3 +450,475 @@ export function createStateStore(
       return new MemoryStateStore()
   }
 }
+
+/**
+ * Cloudflare Durable Object environment types
+ */
+export interface DurableObjectEnv {
+  MULTIPLAYER_DO: DurableObjectNamespace
+}
+
+/**
+ * Cloudflare Durable Object namespace interface
+ */
+export interface DurableObjectNamespace {
+  idFromName(name: string): DurableObjectId
+  get(id: DurableObjectId): DurableObjectStub
+}
+
+export interface DurableObjectId {
+  toString(): string
+}
+
+export interface DurableObjectStub {
+  fetch(request: Request): Promise<Response>
+}
+
+/**
+ * Cloudflare Durable Object state interface
+ */
+export interface DurableObjectState {
+  storage: DurableObjectStorage
+  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T>
+  id: DurableObjectId
+}
+
+export interface DurableObjectStorage {
+  get<T>(key: string): Promise<T | undefined>
+  get<T>(keys: string[]): Promise<Map<string, T>>
+  put<T>(key: string, value: T): Promise<void>
+  put<T>(entries: Record<string, T>): Promise<void>
+  delete(key: string): Promise<boolean>
+  delete(keys: string[]): Promise<number>
+  list<T>(options?: { prefix?: string; limit?: number }): Promise<Map<string, T>>
+  deleteAll(): Promise<void>
+  sql: SqlStorage
+}
+
+export interface SqlStorage {
+  /** Execute a SQL statement. Note: This is Cloudflare DO's SQL API, not shell execution. */
+  run(query: string, ...bindings: unknown[]): SqlStorageCursor
+}
+
+export interface SqlStorageCursor {
+  toArray(): unknown[]
+  one(): unknown
+  raw(): unknown[][]
+}
+
+/**
+ * Configuration for Durable Object state store
+ */
+export const DurableObjectStateStoreConfig = z.object({
+  /** Name for the Durable Object (used to derive the ID) */
+  name: z.string().default("multiplayer-sessions"),
+  /** Use SQL storage (Durable Objects v2) vs KV storage */
+  useSqlStorage: z.boolean().default(true),
+})
+export type DurableObjectStateStoreConfig = z.input<typeof DurableObjectStateStoreConfig>
+
+/**
+ * Cloudflare Durable Object state store for production session persistence.
+ *
+ * This store runs inside a Cloudflare Durable Object and provides:
+ * - Strong consistency guarantees
+ * - Global distribution with automatic routing
+ * - Persistent storage with automatic replication
+ * - Support for both KV and SQL storage modes
+ *
+ * Usage:
+ * 1. Deploy as a Durable Object class
+ * 2. Create instance with DurableObjectState from constructor
+ * 3. Use storage.sql for SQLite-style queries (DO v2)
+ *
+ * Note: This class is designed to be instantiated inside a Durable Object.
+ * For external access, use DurableObjectStateStoreClient.
+ */
+export class DurableObjectStateStore implements StateStore {
+  private state: DurableObjectState
+  private config: z.output<typeof DurableObjectStateStoreConfig>
+  private initialized = false
+
+  constructor(state: DurableObjectState, config: DurableObjectStateStoreConfig = {}) {
+    this.state = state
+    this.config = DurableObjectStateStoreConfig.parse(config)
+  }
+
+  /**
+   * Initialize the storage schema (for SQL mode)
+   */
+  private async init(): Promise<void> {
+    if (this.initialized) return
+
+    if (this.config.useSqlStorage) {
+      // Use blockConcurrencyWhile to ensure initialization happens atomically
+      await this.state.blockConcurrencyWhile(async () => {
+        // Create tables using DO SQL storage
+        this.state.storage.sql.run(`
+          CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            sandbox_id TEXT,
+            state_json TEXT NOT NULL,
+            users_json TEXT NOT NULL,
+            clients_json TEXT NOT NULL,
+            prompt_queue_json TEXT NOT NULL,
+            active_prompt_json TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        `)
+
+        this.state.storage.sql.run(`
+          CREATE INDEX IF NOT EXISTS idx_sessions_session_id ON sessions(session_id)
+        `)
+      })
+    }
+
+    this.initialized = true
+  }
+
+  async get(sessionID: string): Promise<Multiplayer.Session | undefined> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      const rows = this.state.storage.sql
+        .run("SELECT * FROM sessions WHERE id = ?", sessionID)
+        .toArray() as Array<{
+        id: string
+        session_id: string
+        sandbox_id: string | null
+        state_json: string
+        users_json: string
+        clients_json: string
+        prompt_queue_json: string
+        active_prompt_json: string | null
+        created_at: number
+        updated_at: number
+      }>
+
+      if (rows.length === 0) return undefined
+
+      const row = rows[0]
+      return {
+        id: row.id,
+        sessionID: row.session_id,
+        sandboxID: row.sandbox_id ?? undefined,
+        state: JSON.parse(row.state_json),
+        users: JSON.parse(row.users_json),
+        clients: JSON.parse(row.clients_json),
+        promptQueue: JSON.parse(row.prompt_queue_json),
+        activePrompt: row.active_prompt_json ? JSON.parse(row.active_prompt_json) : undefined,
+        createdAt: row.created_at,
+      }
+    }
+
+    // KV storage fallback
+    return this.state.storage.get<Multiplayer.Session>(`session:${sessionID}`)
+  }
+
+  async all(): Promise<Multiplayer.Session[]> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      const rows = this.state.storage.sql
+        .run("SELECT * FROM sessions ORDER BY created_at DESC")
+        .toArray() as Array<{
+        id: string
+        session_id: string
+        sandbox_id: string | null
+        state_json: string
+        users_json: string
+        clients_json: string
+        prompt_queue_json: string
+        active_prompt_json: string | null
+        created_at: number
+        updated_at: number
+      }>
+
+      return rows.map((row) => ({
+        id: row.id,
+        sessionID: row.session_id,
+        sandboxID: row.sandbox_id ?? undefined,
+        state: JSON.parse(row.state_json),
+        users: JSON.parse(row.users_json),
+        clients: JSON.parse(row.clients_json),
+        promptQueue: JSON.parse(row.prompt_queue_json),
+        activePrompt: row.active_prompt_json ? JSON.parse(row.active_prompt_json) : undefined,
+        createdAt: row.created_at,
+      }))
+    }
+
+    // KV storage fallback
+    const map = await this.state.storage.list<Multiplayer.Session>({ prefix: "session:" })
+    return Array.from(map.values())
+  }
+
+  async set(session: Multiplayer.Session): Promise<void> {
+    const now = Date.now()
+
+    if (this.config.useSqlStorage) {
+      await this.init()
+      this.state.storage.sql.run(
+        `INSERT OR REPLACE INTO sessions
+         (id, session_id, sandbox_id, state_json, users_json, clients_json,
+          prompt_queue_json, active_prompt_json, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        session.id,
+        session.sessionID,
+        session.sandboxID ?? null,
+        JSON.stringify(session.state),
+        JSON.stringify(session.users),
+        JSON.stringify(session.clients),
+        JSON.stringify(session.promptQueue),
+        session.activePrompt ? JSON.stringify(session.activePrompt) : null,
+        session.createdAt,
+        now,
+      )
+      return
+    }
+
+    // KV storage fallback
+    await this.state.storage.put(`session:${session.id}`, session)
+  }
+
+  async delete(sessionID: string): Promise<boolean> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      const before = (
+        this.state.storage.sql.run("SELECT COUNT(*) as count FROM sessions WHERE id = ?", sessionID).one() as {
+          count: number
+        }
+      ).count
+      this.state.storage.sql.run("DELETE FROM sessions WHERE id = ?", sessionID)
+      const after = (
+        this.state.storage.sql.run("SELECT COUNT(*) as count FROM sessions WHERE id = ?", sessionID).one() as {
+          count: number
+        }
+      ).count
+      return before > after
+    }
+
+    // KV storage fallback
+    return this.state.storage.delete(`session:${sessionID}`)
+  }
+
+  async has(sessionID: string): Promise<boolean> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      const result = this.state.storage.sql
+        .run("SELECT COUNT(*) as count FROM sessions WHERE id = ?", sessionID)
+        .one() as { count: number }
+      return result.count > 0
+    }
+
+    // KV storage fallback
+    const session = await this.state.storage.get<Multiplayer.Session>(`session:${sessionID}`)
+    return session !== undefined
+  }
+
+  async count(): Promise<number> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      const result = this.state.storage.sql.run("SELECT COUNT(*) as count FROM sessions").one() as { count: number }
+      return result.count
+    }
+
+    // KV storage fallback
+    const map = await this.state.storage.list({ prefix: "session:" })
+    return map.size
+  }
+
+  async clear(): Promise<void> {
+    if (this.config.useSqlStorage) {
+      await this.init()
+      this.state.storage.sql.run("DELETE FROM sessions")
+      return
+    }
+
+    // KV storage fallback
+    await this.state.storage.deleteAll()
+  }
+
+  async close(): Promise<void> {
+    // Durable Objects handle cleanup automatically
+    // This is a no-op for DO storage
+  }
+
+  /**
+   * Get the underlying DO state (for advanced usage)
+   */
+  getDurableObjectState(): DurableObjectState {
+    return this.state
+  }
+}
+
+/**
+ * Client for accessing Durable Object state store from outside the DO.
+ *
+ * This client makes HTTP requests to a Durable Object stub to perform
+ * state operations. Use this when you need to access session state
+ * from Workers or other services.
+ */
+export class DurableObjectStateStoreClient implements StateStore {
+  private stub: DurableObjectStub
+
+  constructor(stub: DurableObjectStub) {
+    this.stub = stub
+  }
+
+  /**
+   * Create a client from environment bindings
+   */
+  static fromEnv(env: DurableObjectEnv, name = "multiplayer-sessions"): DurableObjectStateStoreClient {
+    const id = env.MULTIPLAYER_DO.idFromName(name)
+    const stub = env.MULTIPLAYER_DO.get(id)
+    return new DurableObjectStateStoreClient(stub)
+  }
+
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const response = await this.stub.fetch(
+      new Request(`https://do-internal/${path}`, {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      }),
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`DO request failed: ${response.status} ${error}`)
+    }
+
+    return response.json() as Promise<T>
+  }
+
+  async get(sessionID: string): Promise<Multiplayer.Session | undefined> {
+    try {
+      return await this.request<Multiplayer.Session>("GET", `sessions/${sessionID}`)
+    } catch {
+      return undefined
+    }
+  }
+
+  async all(): Promise<Multiplayer.Session[]> {
+    return this.request<Multiplayer.Session[]>("GET", "sessions")
+  }
+
+  async set(session: Multiplayer.Session): Promise<void> {
+    await this.request("PUT", `sessions/${session.id}`, session)
+  }
+
+  async delete(sessionID: string): Promise<boolean> {
+    const result = await this.request<{ deleted: boolean }>("DELETE", `sessions/${sessionID}`)
+    return result.deleted
+  }
+
+  async has(sessionID: string): Promise<boolean> {
+    const result = await this.request<{ exists: boolean }>("HEAD", `sessions/${sessionID}`)
+    return result.exists
+  }
+
+  async count(): Promise<number> {
+    const result = await this.request<{ count: number }>("GET", "sessions/count")
+    return result.count
+  }
+
+  async clear(): Promise<void> {
+    await this.request("DELETE", "sessions")
+  }
+
+  async close(): Promise<void> {
+    // No-op for client
+  }
+}
+
+/**
+ * Base class for implementing the Multiplayer Durable Object.
+ *
+ * Extend this class and deploy as a Durable Object to use DO state storage.
+ *
+ * Example:
+ * ```typescript
+ * export class MultiplayerDO extends MultiplayerDurableObject {
+ *   constructor(state: DurableObjectState, env: Env) {
+ *     super(state, { useSqlStorage: true })
+ *   }
+ * }
+ * ```
+ */
+export abstract class MultiplayerDurableObject {
+  protected store: DurableObjectStateStore
+
+  constructor(state: DurableObjectState, config: DurableObjectStateStoreConfig = {}) {
+    this.store = new DurableObjectStateStore(state, config)
+  }
+
+  /**
+   * Handle incoming HTTP requests to the Durable Object.
+   * Routes requests to the appropriate state store operations.
+   */
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url)
+    const path = url.pathname.slice(1) // Remove leading slash
+    const parts = path.split("/")
+
+    try {
+      // GET /sessions - list all sessions
+      if (request.method === "GET" && parts[0] === "sessions" && parts.length === 1) {
+        const sessions = await this.store.all()
+        return Response.json(sessions)
+      }
+
+      // GET /sessions/count - get session count
+      if (request.method === "GET" && parts[0] === "sessions" && parts[1] === "count") {
+        const count = await this.store.count()
+        return Response.json({ count })
+      }
+
+      // GET /sessions/:id - get session by ID
+      if (request.method === "GET" && parts[0] === "sessions" && parts.length === 2) {
+        const session = await this.store.get(parts[1])
+        if (!session) {
+          return new Response("Not found", { status: 404 })
+        }
+        return Response.json(session)
+      }
+
+      // HEAD /sessions/:id - check if session exists
+      if (request.method === "HEAD" && parts[0] === "sessions" && parts.length === 2) {
+        const exists = await this.store.has(parts[1])
+        return Response.json({ exists })
+      }
+
+      // PUT /sessions/:id - create/update session
+      if (request.method === "PUT" && parts[0] === "sessions" && parts.length === 2) {
+        const session = (await request.json()) as Multiplayer.Session
+        await this.store.set(session)
+        return Response.json({ success: true })
+      }
+
+      // DELETE /sessions/:id - delete session
+      if (request.method === "DELETE" && parts[0] === "sessions" && parts.length === 2) {
+        const deleted = await this.store.delete(parts[1])
+        return Response.json({ deleted })
+      }
+
+      // DELETE /sessions - clear all sessions
+      if (request.method === "DELETE" && parts[0] === "sessions" && parts.length === 1) {
+        await this.store.clear()
+        return Response.json({ success: true })
+      }
+
+      return new Response("Not found", { status: 404 })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error"
+      return new Response(message, { status: 500 })
+    }
+  }
+
+  /**
+   * Get the underlying state store for custom operations
+   */
+  getStateStore(): DurableObjectStateStore {
+    return this.store
+  }
+}
