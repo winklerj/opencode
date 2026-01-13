@@ -33,6 +33,7 @@ import { Global } from "../global"
 import { ProjectRoute } from "./project"
 import { BackgroundRoute } from "./background"
 import { MultiplayerRoute } from "./multiplayer"
+import { SandboxRoute } from "./sandbox"
 import { ToolRegistry } from "../tool/registry"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import { SessionPrompt } from "../session/prompt"
@@ -293,6 +294,7 @@ export namespace Server {
         .route("/project", ProjectRoute)
         .route("/background", BackgroundRoute)
         .route("/multiplayer", MultiplayerRoute)
+        .route("/sandbox", SandboxRoute)
 
         .get(
           "/pty",

@@ -46,18 +46,23 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 2.1 Sandbox API (`/sandbox/*`)
 | Task | Status | Notes |
 |------|--------|-------|
-| POST /sandbox | pending | Create sandbox |
-| GET /sandbox/:id | pending | Get sandbox info |
-| GET /sandbox | pending | List sandboxes |
-| POST /sandbox/:id/start | pending | Start sandbox |
-| POST /sandbox/:id/stop | pending | Stop sandbox |
-| POST /sandbox/:id/terminate | pending | Terminate sandbox |
-| POST /sandbox/:id/snapshot | pending | Create snapshot |
-| POST /sandbox/restore | pending | Restore from snapshot |
-| POST /sandbox/:id/exec | pending | Execute command |
-| GET /sandbox/:id/logs/:service | pending | Stream logs (SSE) |
-| GET /sandbox/:id/git | pending | Git sync status |
-| POST /sandbox/:id/git/sync | pending | Force git sync |
+| POST /sandbox | complete | Create sandbox |
+| GET /sandbox/:id | complete | Get sandbox info |
+| GET /sandbox | complete | List sandboxes |
+| POST /sandbox/:id/start | complete | Start sandbox |
+| POST /sandbox/:id/stop | complete | Stop sandbox |
+| POST /sandbox/:id/terminate | complete | Terminate sandbox |
+| POST /sandbox/:id/snapshot | complete | Create snapshot |
+| POST /sandbox/restore | complete | Restore from snapshot |
+| GET /sandbox/snapshots | complete | List snapshots |
+| DELETE /sandbox/snapshots/:id | complete | Delete snapshot |
+| POST /sandbox/:id/exec | complete | Execute command |
+| GET /sandbox/:id/logs/:service | complete | Stream logs (SSE) |
+| GET /sandbox/:id/git | complete | Git sync status |
+| POST /sandbox/:id/git/sync | complete | Force git sync |
+| GET /sandbox/pool/stats | complete | Warm pool statistics |
+| POST /sandbox/pool/claim | complete | Claim from warm pool |
+| POST /sandbox/pool/typing | complete | Trigger warmup on typing |
 
 ### 2.2 Multiplayer API (`/multiplayer/*`)
 | Task | Status | Notes |
@@ -219,3 +224,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Background Agent API | complete | Full API: spawn, get, list, cancel, output, events (SSE), stats |
 | 2026-01-13 | MultiplayerService | complete | Singleton service wrapping SessionManager for opencode |
 | 2026-01-13 | Multiplayer API | complete | Full API: CRUD sessions, join/leave, cursor, locks, clients, state |
+| 2026-01-13 | SandboxService | complete | Singleton service wrapping Provider, WarmPool, SnapshotManager |
+| 2026-01-13 | Sandbox API | complete | Full API: CRUD, lifecycle, exec, logs, git, snapshots, warm pool |
