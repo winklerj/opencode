@@ -62,9 +62,20 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 2.2 Multiplayer API (`/multiplayer/*`)
 | Task | Status | Notes |
 |------|--------|-------|
-| POST /multiplayer/:sessionID/join | pending | Join session |
-| POST /multiplayer/:sessionID/leave | pending | Leave session |
-| PUT /multiplayer/:sessionID/cursor | pending | Update cursor |
+| POST /multiplayer | complete | Create session |
+| GET /multiplayer | complete | List sessions |
+| GET /multiplayer/:sessionID | complete | Get session info |
+| DELETE /multiplayer/:sessionID | complete | Delete session |
+| POST /multiplayer/:sessionID/join | complete | Join session |
+| POST /multiplayer/:sessionID/leave | complete | Leave session |
+| PUT /multiplayer/:sessionID/cursor | complete | Update cursor |
+| POST /multiplayer/:sessionID/lock | complete | Acquire edit lock |
+| DELETE /multiplayer/:sessionID/lock | complete | Release edit lock |
+| POST /multiplayer/:sessionID/connect | complete | Connect client |
+| POST /multiplayer/:sessionID/disconnect | complete | Disconnect client |
+| GET /multiplayer/:sessionID/users | complete | Get users |
+| GET /multiplayer/:sessionID/clients | complete | Get clients |
+| PUT /multiplayer/:sessionID/state | complete | Update state |
 | POST /multiplayer/:sessionID/prompt | pending | Queue prompt |
 | DELETE /multiplayer/:sessionID/prompt/:id | pending | Cancel prompt |
 | GET /multiplayer/:sessionID/ws | pending | WebSocket connection |
@@ -206,3 +217,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | check_session tool | complete | Tool for checking background agent status |
 | 2026-01-13 | BackgroundService | complete | Singleton service for agent scheduling in opencode |
 | 2026-01-13 | Background Agent API | complete | Full API: spawn, get, list, cancel, output, events (SSE), stats |
+| 2026-01-13 | MultiplayerService | complete | Singleton service wrapping SessionManager for opencode |
+| 2026-01-13 | Multiplayer API | complete | Full API: CRUD sessions, join/leave, cursor, locks, clients, state |

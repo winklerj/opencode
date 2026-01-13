@@ -32,6 +32,7 @@ import { ProviderAuth } from "../provider/auth"
 import { Global } from "../global"
 import { ProjectRoute } from "./project"
 import { BackgroundRoute } from "./background"
+import { MultiplayerRoute } from "./multiplayer"
 import { ToolRegistry } from "../tool/registry"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import { SessionPrompt } from "../session/prompt"
@@ -291,6 +292,7 @@ export namespace Server {
 
         .route("/project", ProjectRoute)
         .route("/background", BackgroundRoute)
+        .route("/multiplayer", MultiplayerRoute)
 
         .get(
           "/pty",
