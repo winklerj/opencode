@@ -151,10 +151,10 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 4.1 Slack Bot (`packages/clients/slack-bot/`)
 | Task | Status | Notes |
 |------|--------|-------|
-| Webhook handler | pending | Events + interactions |
-| Repository classifier | pending | Channel/message context |
-| Thread conversation | pending | Follow-up prompts |
-| Block Kit UI | pending | Status updates |
+| Webhook handler | complete | app_mention, message, reaction_added events with signature verification |
+| Repository classifier | complete | Channel/message context with GitHub link, mention, topic detection |
+| Thread conversation | complete | ThreadManager with status tracking, session association, TTL cleanup |
+| Block Kit UI | complete | BlockKit builders for processing, progress, complete, error, session info messages |
 
 ### 4.2 Chrome Extension (`packages/clients/chrome-extension/`)
 | Task | Status | Notes |
@@ -258,3 +258,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | SQLite state fallback | complete | StateStore interface, SQLiteStateStore with persistence, MemoryStateStore, 43 tests |
 | 2026-01-13 | GitHub PR Client | complete | WebhookHandler, SessionManager, ResponseFlow with Octokit integration, 32 tests |
 | 2026-01-13 | Durable Object state | complete | DurableObjectStateStore with SQL/KV modes, DurableObjectStateStoreClient, MultiplayerDurableObject base class |
+| 2026-01-13 | Slack Bot Client | complete | WebhookHandler, RepositoryClassifier, ThreadManager, BlockKit UI with 75 tests |
