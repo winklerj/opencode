@@ -110,7 +110,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Desktop API endpoints | pending | /sandbox/:id/desktop/* |
 | Editor API endpoints | pending | /sandbox/:id/editor/* |
 | Stats API endpoints | pending | /stats/* |
-| Skills API endpoints | pending | /skills/* |
+| Skills API endpoints | complete | GET /skills, GET /skills/:name |
 | PR Session API endpoints | pending | /pr-session/* |
 | Webhook handlers | pending | /webhook/* |
 
@@ -212,6 +212,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Date | Task | Status | Notes |
 |------|------|--------|-------|
+| 2026-01-13 | Skills API endpoints | complete | GET /skills and GET /skills/:name with content |
 | 2026-01-13 | Fix SandboxService API mismatches | complete | Aligned service and routes with WarmPoolManager and SnapshotManager APIs |
 | 2026-01-13 | Multiplayer WebSocket endpoint | complete | Real-time sync with cursor/lock/state events, client message handling |
 | 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
