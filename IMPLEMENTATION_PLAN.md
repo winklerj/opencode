@@ -37,7 +37,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Durable Object state | pending | HostedAgent.tla | Cloudflare DO integration |
 | SQLite state fallback | pending | - | Local/memory fallback |
 | WebSocket sync | complete | - | Real-time updates via /multiplayer/:id/ws |
-| Conflict resolution | pending | - | Edit conflict handling |
+| Conflict resolution | complete | - | ConflictResolver with strategies (last-write-wins, reject, merge) |
 
 ---
 
@@ -254,3 +254,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Skills System package | complete | SkillsRegistry, SkillsLoader, SkillsExecutor with 5 built-in skills and 58 tests |
 | 2026-01-13 | Image builder | complete | ImageBuilder with scheduled rebuilds, parallel builds, event emission, job management |
 | 2026-01-13 | Image registry | complete | ImageRegistry with tagging strategy, latest tracking, cleanup, stats, 49 tests |
+| 2026-01-13 | Conflict resolution | complete | ConflictResolver with 3 strategies, OptimisticUpdater for client-side, 74 tests |
