@@ -111,7 +111,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Editor API endpoints | complete | /sandbox/:id/editor/* (get, start, stop) |
 | Stats API endpoints | complete | GET /stats, GET /stats/live, GET /stats/historical |
 | Skills API endpoints | complete | GET /skills, GET /skills/:name |
-| PR Session API endpoints | pending | /pr-session/* |
+| PR Session API endpoints | complete | /pr-session/* (create, get, list, delete, comments, respond) |
 | Webhook handlers | pending | /webhook/* |
 
 ---
@@ -241,3 +241,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Voice API endpoints | complete | VoiceService and routes: start, stop, status, send (audio transcription) |
 | 2026-01-13 | Desktop API endpoints | complete | DesktopService and routes: get, start, stop, screenshot, websocket |
 | 2026-01-13 | Editor API endpoints | complete | EditorService and routes: get, start, stop (code-server integration) |
+| 2026-01-13 | PR Session API endpoints | complete | PRSessionService and routes: create, get, list, delete, comments, respond |
