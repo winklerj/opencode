@@ -112,7 +112,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Stats API endpoints | complete | GET /stats, GET /stats/live, GET /stats/historical |
 | Skills API endpoints | complete | GET /skills, GET /skills/:name |
 | PR Session API endpoints | complete | /pr-session/* (create, get, list, delete, comments, respond) |
-| Webhook handlers | pending | /webhook/* |
+| Webhook handlers | complete | /webhook/* (github, slack/events, slack/interactions) |
 
 ---
 
@@ -242,3 +242,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Desktop API endpoints | complete | DesktopService and routes: get, start, stop, screenshot, websocket |
 | 2026-01-13 | Editor API endpoints | complete | EditorService and routes: get, start, stop (code-server integration) |
 | 2026-01-13 | PR Session API endpoints | complete | PRSessionService and routes: create, get, list, delete, comments, respond |
+| 2026-01-13 | Webhook handlers | complete | WebhookService and routes: github, slack/events, slack/interactions |
