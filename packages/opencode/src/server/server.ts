@@ -36,6 +36,7 @@ import { MultiplayerRoute } from "./multiplayer"
 import { SandboxRoute } from "./sandbox"
 import { SkillsRoute } from "./skills"
 import { StatsRoute } from "./stats"
+import { VoiceRoute } from "./voice"
 import { ToolRegistry } from "../tool/registry"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import { SessionPrompt } from "../session/prompt"
@@ -299,6 +300,7 @@ export namespace Server {
         .route("/sandbox", SandboxRoute)
         .route("/skills", SkillsRoute)
         .route("/stats", StatsRoute)
+        .route("/session/:sessionID/voice", VoiceRoute)
 
         .get(
           "/pty",

@@ -106,7 +106,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 2.4 Additional APIs
 | Task | Status | Notes |
 |------|--------|-------|
-| Voice API endpoints | pending | /session/:id/voice/* |
+| Voice API endpoints | complete | /session/:id/voice/* (start, stop, status, send) |
 | Desktop API endpoints | pending | /sandbox/:id/desktop/* |
 | Editor API endpoints | pending | /sandbox/:id/editor/* |
 | Stats API endpoints | complete | GET /stats, GET /stats/live, GET /stats/historical |
@@ -238,3 +238,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | SandboxService | complete | Singleton service wrapping Provider, WarmPool, SnapshotManager |
 | 2026-01-13 | Sandbox API | complete | Full API: CRUD, lifecycle, exec, logs, git, snapshots, warm pool |
 | 2026-01-13 | Prompt Queue API | complete | Full API: add, list, get, cancel, reorder, status, start, complete |
+| 2026-01-13 | Voice API endpoints | complete | VoiceService and routes: start, stop, status, send (audio transcription) |
