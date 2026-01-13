@@ -167,9 +167,9 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 4.3 GitHub PR Client (`packages/clients/github-pr/`)
 | Task | Status | Notes |
 |------|--------|-------|
-| Webhook handler | pending | PR events |
-| Session manager | pending | PR-session mapping |
-| Comment response flow | pending | Address + reply |
+| Webhook handler | complete | PR events, review comments, issue comments |
+| Session manager | complete | PR-session mapping with context tracking |
+| Comment response flow | complete | Response posting via Octokit |
 
 ### 4.4 Web Interface Extensions
 | Task | Status | Notes |
@@ -256,3 +256,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Image registry | complete | ImageRegistry with tagging strategy, latest tracking, cleanup, stats, 49 tests |
 | 2026-01-13 | Conflict resolution | complete | ConflictResolver with 3 strategies, OptimisticUpdater for client-side, 74 tests |
 | 2026-01-13 | SQLite state fallback | complete | StateStore interface, SQLiteStateStore with persistence, MemoryStateStore, 43 tests |
+| 2026-01-13 | GitHub PR Client | complete | WebhookHandler, SessionManager, ResponseFlow with Octokit integration, 32 tests |
