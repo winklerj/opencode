@@ -123,8 +123,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 |------|--------|-------|
 | spawn_session tool | complete | Spawn parallel sessions via BackgroundService |
 | check_session tool | complete | Check spawned session status |
-| use_skill tool | pending | Apply predefined skills |
-| computer_use tool | pending | Desktop interaction |
+| use_skill tool | complete | Already implemented via SkillTool (loads skill content/prompts) |
+| computer_use tool | complete | Desktop interaction via DesktopService (screenshot, click, type, key, scroll, move) |
 
 ### 3.2 Plugin Hooks
 | Task | Status | Notes |
@@ -243,3 +243,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Editor API endpoints | complete | EditorService and routes: get, start, stop (code-server integration) |
 | 2026-01-13 | PR Session API endpoints | complete | PRSessionService and routes: create, get, list, delete, comments, respond |
 | 2026-01-13 | Webhook handlers | complete | WebhookService and routes: github, slack/events, slack/interactions |
+| 2026-01-13 | use_skill tool | complete | Already implemented via SkillTool |
+| 2026-01-13 | computer_use tool | complete | ComputerUseTool for desktop interaction (screenshot, click, type, key, scroll, move) |

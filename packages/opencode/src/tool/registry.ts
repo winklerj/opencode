@@ -23,6 +23,7 @@ import { WebSearchTool } from "./websearch"
 import { CodeSearchTool } from "./codesearch"
 import { SpawnSessionTool } from "./spawn-session"
 import { CheckSessionTool } from "./check-session"
+import { ComputerUseTool } from "./computer-use"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util/log"
 import { LspTool } from "./lsp"
@@ -111,6 +112,7 @@ export namespace ToolRegistry {
       SkillTool,
       SpawnSessionTool,
       CheckSessionTool,
+      ComputerUseTool,
       ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [LspTool] : []),
       ...(config.experimental?.batch_tool === true ? [BatchTool] : []),
       ...custom,
