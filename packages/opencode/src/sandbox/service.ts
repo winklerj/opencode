@@ -1,5 +1,13 @@
 import { Instance } from "../project/instance"
-import { LocalProvider, type Provider, Sandbox, WarmPoolManager, SnapshotManager } from "@opencode-ai/sandbox"
+import {
+  LocalProvider,
+  type Provider,
+  Sandbox,
+  WarmPoolManager,
+  SnapshotManager,
+  type Snapshot,
+  type ClaimResult,
+} from "@opencode-ai/sandbox"
 
 /**
  * SandboxService provides sandbox orchestration for the project.
@@ -24,9 +32,8 @@ export namespace SandboxService {
   export const getWarmPool = Instance.state(async () => {
     const provider = await getProvider()
     const pool = new WarmPoolManager(provider, {
-      maxSize: 5,
+      size: 5,
       ttl: 1800000, // 30 minutes
-      warmTimeout: 120000,
     })
     return pool
   })
@@ -35,10 +42,9 @@ export namespace SandboxService {
    * Get the snapshot manager for the current project
    */
   export const getSnapshotManager = Instance.state(async () => {
-    const provider = await getProvider()
-    const manager = new SnapshotManager(provider, {
-      maxSnapshots: 100,
-      defaultTTL: 86400000, // 24 hours
+    const manager = new SnapshotManager({
+      maxSnapshotsPerSession: 100,
+      snapshotTTL: 86400000, // 24 hours
     })
     return manager
   })
@@ -146,61 +152,83 @@ export namespace SandboxService {
   /**
    * Claim a sandbox from the warm pool
    */
-  export async function claimFromPool(projectID: string): Promise<Sandbox.Info | null> {
+  export async function claimFromPool(
+    repository: string,
+    projectID: string,
+    imageTag?: string,
+  ): Promise<ClaimResult> {
     const pool = await getWarmPool()
-    return pool.claim(projectID)
+    return pool.claim(repository, projectID, imageTag)
   }
 
   /**
    * Release a sandbox back to the warm pool
    */
-  export async function releaseToPool(sandbox: Sandbox.Info): Promise<void> {
+  export async function releaseToPool(sandboxID: string): Promise<boolean> {
     const pool = await getWarmPool()
-    return pool.release(sandbox)
+    return pool.release(sandboxID)
   }
 
   /**
    * Trigger warmup on typing
    */
-  export async function onTyping(projectID: string): Promise<void> {
+  export async function onTyping(repository: string, projectID: string, imageTag?: string): Promise<void> {
     const pool = await getWarmPool()
-    return pool.onTyping(projectID)
+    return pool.onTyping(repository, projectID, imageTag)
   }
 
   /**
    * Get warm pool statistics
    */
-  export async function poolStats() {
+  export async function poolStats(): Promise<{ total: number; byTag: Record<string, number> }> {
     const pool = await getWarmPool()
-    return pool.stats()
+    return {
+      total: pool.getTotalPoolSize(),
+      byTag: {}, // WarmPoolManager doesn't expose per-tag stats directly
+    }
   }
 
   /**
    * Create a managed snapshot
+   *
+   * Note: To use this, you should first get the git status from the sandbox
+   * to provide the git commit hash and uncommitted changes status.
    */
   export async function createSnapshot(
     sandboxID: string,
-    options?: { ttl?: number },
-  ): Promise<{ id: string; expiresAt: number }> {
+    sessionID: string,
+    gitCommit: string,
+    hasUncommittedChanges: boolean = false,
+  ): Promise<Snapshot | null> {
     const manager = await getSnapshotManager()
-    const snapshot = await manager.create(sandboxID, options)
-    return { id: snapshot.id, expiresAt: snapshot.expiresAt }
+    return manager.create(sandboxID, sessionID, gitCommit, hasUncommittedChanges)
   }
 
   /**
-   * Restore from a managed snapshot
+   * Restore from a managed snapshot for a session
    */
-  export async function restoreSnapshot(snapshotID: string): Promise<Sandbox.Info> {
+  export async function restoreSnapshot(sessionID: string): Promise<Sandbox.Info | null> {
     const manager = await getSnapshotManager()
-    return manager.restore(snapshotID)
+    return manager.restore(sessionID)
   }
 
   /**
-   * List all managed snapshots
+   * Get latest snapshot for a session
    */
-  export async function listSnapshots(): Promise<Array<{ id: string; sandboxID: string; expiresAt: number }>> {
+  export async function getLatestSnapshot(sessionID: string): Promise<Snapshot | undefined> {
     const manager = await getSnapshotManager()
-    return manager.list()
+    return manager.getLatest(sessionID)
+  }
+
+  /**
+   * List all managed snapshots for a session
+   */
+  export async function listSnapshots(sessionID?: string): Promise<Snapshot[]> {
+    const manager = await getSnapshotManager()
+    if (sessionID) {
+      return manager.bySession(sessionID)
+    }
+    return manager.all()
   }
 
   /**
@@ -208,6 +236,14 @@ export namespace SandboxService {
    */
   export async function deleteSnapshot(snapshotID: string): Promise<boolean> {
     const manager = await getSnapshotManager()
-    return manager.delete(snapshotID)
+    return manager.remove(snapshotID)
+  }
+
+  /**
+   * Check if session has a valid snapshot
+   */
+  export async function hasValidSnapshot(sessionID: string): Promise<boolean> {
+    const manager = await getSnapshotManager()
+    return manager.hasValidSnapshot(sessionID)
   }
 }

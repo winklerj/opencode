@@ -222,7 +222,7 @@ export const SandboxRoute = new Hono()
               schema: resolver(
                 z.object({
                   snapshotID: z.string(),
-                  expiresAt: z.number(),
+                  createdAt: z.number(),
                 }),
               ),
             },
@@ -234,23 +234,26 @@ export const SandboxRoute = new Hono()
     validator("param", z.object({ id: z.string() })),
     validator(
       "json",
-      z
-        .object({
-          ttl: z.number().optional().describe("Time to live in milliseconds"),
-        })
-        .optional(),
+      z.object({
+        sessionID: z.string().describe("Session ID that owns this sandbox"),
+        gitCommit: z.string().describe("Current git commit hash"),
+        hasUncommittedChanges: z.boolean().optional().describe("Whether there are uncommitted changes"),
+      }),
     ),
     async (c) => {
       const { id } = c.req.valid("param")
-      const body = c.req.valid("json")
+      const { sessionID, gitCommit, hasUncommittedChanges } = c.req.valid("json")
 
       const sandbox = await SandboxService.get(id)
       if (!sandbox) {
         return c.json({ error: "Sandbox not found" }, 404)
       }
 
-      const snapshot = await SandboxService.createSnapshot(id, body)
-      return c.json({ snapshotID: snapshot.id, expiresAt: snapshot.expiresAt })
+      const snapshot = await SandboxService.createSnapshot(id, sessionID, gitCommit, hasUncommittedChanges)
+      if (!snapshot) {
+        return c.json({ error: "Failed to create snapshot" }, 400)
+      }
+      return c.json({ snapshotID: snapshot.id, createdAt: snapshot.createdAt })
     },
   )
   // POST /sandbox/restore - Restore from snapshot
@@ -258,7 +261,7 @@ export const SandboxRoute = new Hono()
     "/restore",
     describeRoute({
       summary: "Restore from snapshot",
-      description: "Restore a sandbox from a previously created snapshot.",
+      description: "Restore a sandbox from the latest snapshot for a session.",
       operationId: "sandbox.restore",
       responses: {
         200: {
@@ -275,18 +278,17 @@ export const SandboxRoute = new Hono()
     validator(
       "json",
       z.object({
-        snapshotID: z.string().describe("ID of the snapshot to restore"),
+        sessionID: z.string().describe("Session ID to restore snapshot for"),
       }),
     ),
     async (c) => {
-      const { snapshotID } = c.req.valid("json")
+      const { sessionID } = c.req.valid("json")
 
-      try {
-        const sandbox = await SandboxService.restoreSnapshot(snapshotID)
-        return c.json(sandbox)
-      } catch {
-        return c.json({ error: "Snapshot not found or expired" }, 404)
+      const sandbox = await SandboxService.restoreSnapshot(sessionID)
+      if (!sandbox) {
+        return c.json({ error: "No valid snapshot found for session" }, 404)
       }
+      return c.json(sandbox)
     },
   )
   // GET /sandbox/snapshots - List all snapshots
@@ -557,13 +559,15 @@ export const SandboxRoute = new Hono()
     validator(
       "json",
       z.object({
+        repository: z.string().describe("Repository URL to claim sandbox for"),
         projectID: z.string().describe("Project ID to claim sandbox for"),
+        imageTag: z.string().optional().describe("Optional specific image tag"),
       }),
     ),
     async (c) => {
-      const { projectID } = c.req.valid("json")
-      const sandbox = await SandboxService.claimFromPool(projectID)
-      return c.json(sandbox)
+      const { repository, projectID, imageTag } = c.req.valid("json")
+      const result = await SandboxService.claimFromPool(repository, projectID, imageTag)
+      return c.json(result)
     },
   )
   // POST /sandbox/pool/typing - Trigger warmup on typing
@@ -587,12 +591,14 @@ export const SandboxRoute = new Hono()
     validator(
       "json",
       z.object({
+        repository: z.string().describe("Repository URL to warm sandbox for"),
         projectID: z.string().describe("Project ID to warm sandbox for"),
+        imageTag: z.string().optional().describe("Optional specific image tag"),
       }),
     ),
     async (c) => {
-      const { projectID } = c.req.valid("json")
-      await SandboxService.onTyping(projectID)
+      const { repository, projectID, imageTag } = c.req.valid("json")
+      await SandboxService.onTyping(repository, projectID, imageTag)
       return c.json({ success: true })
     },
   )

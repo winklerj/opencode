@@ -212,6 +212,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Date | Task | Status | Notes |
 |------|------|--------|-------|
+| 2026-01-13 | Fix SandboxService API mismatches | complete | Aligned service and routes with WarmPoolManager and SnapshotManager APIs |
 | 2026-01-13 | Multiplayer WebSocket endpoint | complete | Real-time sync with cursor/lock/state events, client message handling |
 | 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
 | 2026-01-13 | Local provider implementation | complete | Full provider with tests |

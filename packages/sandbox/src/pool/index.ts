@@ -1,1 +1,1 @@
-export { WarmPoolManager, type WarmPoolConfig } from "./manager"
+export { WarmPoolManager, type WarmPoolConfig, type ClaimResult } from "./manager"
