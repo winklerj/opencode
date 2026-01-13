@@ -1,5 +1,6 @@
 import { Instance } from "../project/instance"
 import { AgentScheduler, type Agent as BackgroundAgent } from "@opencode-ai/background"
+import { Plugin } from "../plugin"
 
 /**
  * BackgroundService provides a singleton AgentScheduler for the project.
@@ -47,7 +48,8 @@ export namespace BackgroundService {
   })
 
   /**
-   * Spawn a background agent
+   * Spawn a background agent.
+   * Triggers background.spawn hook to allow plugins to configure sandbox.
    */
   export async function spawn(input: {
     parentSessionID: string
@@ -55,18 +57,56 @@ export namespace BackgroundService {
     type?: "research" | "parallel-work" | "review"
     repository?: string
     branch?: string
+    imageTag?: string
   }): Promise<{ success: true; agent: BackgroundAgent } | { success: false; error: string }> {
+    // Allow plugins to modify sandbox configuration
+    const hookOutput = await Plugin.trigger(
+      "background.spawn",
+      {
+        parentSessionID: input.parentSessionID,
+        task: input.task,
+        sandboxConfig: input.repository
+          ? {
+              repository: input.repository,
+              branch: input.branch,
+              imageTag: input.imageTag,
+            }
+          : undefined,
+      },
+      {
+        sandboxConfig: undefined as
+          | {
+              projectID?: string
+              repository?: string
+              branch?: string
+              services?: string[]
+              imageTag?: string
+            }
+          | undefined,
+      },
+    )
+
+    // Merge plugin modifications with original input
+    const sandboxConfig = input.repository
+      ? {
+          repository: hookOutput.sandboxConfig?.repository ?? input.repository,
+          branch: hookOutput.sandboxConfig?.branch ?? input.branch,
+          imageTag: hookOutput.sandboxConfig?.imageTag ?? input.imageTag,
+        }
+      : hookOutput.sandboxConfig
+        ? {
+            repository: hookOutput.sandboxConfig.repository!,
+            branch: hookOutput.sandboxConfig.branch,
+            imageTag: hookOutput.sandboxConfig.imageTag,
+          }
+        : undefined
+
     const scheduler = await getScheduler()
 
     const result = scheduler.spawn({
       parentSessionID: input.parentSessionID,
       task: input.task,
-      sandboxConfig: input.repository
-        ? {
-            repository: input.repository,
-            branch: input.branch,
-          }
-        : undefined,
+      sandboxConfig,
     })
 
     if (!result.success || !result.agent) {

@@ -3,6 +3,7 @@ import { Log } from "../util/log"
 import { NamedError } from "@opencode-ai/util/error"
 import { Bus } from "@/bus"
 import { BusEvent } from "@/bus/bus-event"
+import { Plugin } from "../plugin"
 
 /**
  * Voice Service
@@ -243,20 +244,47 @@ export namespace VoiceService {
    * This is a convenience method that processes audio and,
    * if the transcript is final and meets confidence threshold,
    * returns it ready to be sent as a prompt.
+   *
+   * Triggers voice.transcribed hook to allow plugins to process or filter transcribed text.
    */
   export async function sendVoicePrompt(
     sessionID: string,
     audioData: string,
     mimeType: string = "audio/webm",
     confidenceThreshold: number = 0.5,
-  ): Promise<{ transcript: TranscriptResult; shouldSend: boolean }> {
+  ): Promise<{ transcript: TranscriptResult; shouldSend: boolean; processedText?: string }> {
     const result = await processAudio(sessionID, audioData, mimeType)
+
+    // Trigger hook to allow plugins to process or reject the transcript
+    const hookOutput = await Plugin.trigger(
+      "voice.transcribed",
+      {
+        sessionID,
+        transcript: result.text,
+        isFinal: result.isFinal,
+        confidence: result.confidence,
+      },
+      {
+        processedText: undefined,
+        reject: false,
+      },
+    )
+
+    // If plugin rejected the transcript, don't send
+    if (hookOutput.reject) {
+      return {
+        transcript: result,
+        shouldSend: false,
+        processedText: undefined,
+      }
+    }
 
     const shouldSend = result.isFinal && result.confidence >= confidenceThreshold && result.text.trim().length > 0
 
     return {
       transcript: result,
       shouldSend,
+      processedText: hookOutput.processedText ?? result.text,
     }
   }
 

@@ -8,6 +8,7 @@ import {
   type Snapshot,
   type ClaimResult,
 } from "@opencode-ai/sandbox"
+import { Plugin } from "../plugin"
 
 /**
  * SandboxService provides sandbox orchestration for the project.
@@ -50,11 +51,59 @@ export namespace SandboxService {
   })
 
   /**
-   * Create a new sandbox
+   * Create a new sandbox.
+   * Triggers sandbox.create.before hook to allow modification of input.
+   * Triggers sandbox.ready hook when sandbox reaches ready status.
    */
   export async function create(input: Sandbox.CreateInput): Promise<Sandbox.Info> {
+    const parsed = Sandbox.CreateInput.parse(input)
+
+    // Allow plugins to modify sandbox configuration before creation
+    const hookOutput = await Plugin.trigger(
+      "sandbox.create.before",
+      {
+        projectID: parsed.projectID,
+        repository: parsed.repository,
+        branch: parsed.branch,
+        services: parsed.services,
+        imageTag: parsed.imageTag,
+      },
+      {
+        services: parsed.services,
+        imageTag: parsed.imageTag,
+      },
+    )
+
+    // Apply hook modifications
+    const modifiedInput: Sandbox.CreateInput = {
+      ...parsed,
+      services: hookOutput.services,
+      imageTag: hookOutput.imageTag,
+    }
+
     const provider = await getProvider()
-    return provider.create(input)
+    const sandbox = await provider.create(modifiedInput)
+
+    // Trigger ready hook if sandbox is ready
+    if (sandbox.status === "ready") {
+      await Plugin.trigger(
+        "sandbox.ready",
+        {
+          sandboxID: sandbox.id,
+          projectID: sandbox.projectID,
+          status: "ready" as const,
+          services: sandbox.services.map((s) => ({
+            name: s.name,
+            status: s.status,
+            port: s.port,
+            url: s.url,
+          })),
+        },
+        {},
+      )
+    }
+
+    return sandbox
   }
 
   /**

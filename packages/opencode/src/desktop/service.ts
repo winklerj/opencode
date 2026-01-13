@@ -3,6 +3,7 @@ import { Log } from "../util/log"
 import { NamedError } from "@opencode-ai/util/error"
 import { Bus } from "@/bus"
 import { BusEvent } from "@/bus/bus-event"
+import { Plugin } from "../plugin"
 
 /**
  * Desktop Service
@@ -163,6 +164,10 @@ export namespace DesktopService {
       desktopInfo.vncPort = vncPort
 
       await Bus.publish(Event.Started, { sandboxID, vncUrl })
+
+      // Trigger desktop.started hook
+      await Plugin.trigger("desktop.started", { sandboxID, vncUrl }, {})
+
       log.info("desktop environment started", { sandboxID, vncUrl })
 
       return desktopInfo

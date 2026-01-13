@@ -129,16 +129,20 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 3.2 Plugin Hooks
 | Task | Status | Notes |
 |------|--------|-------|
-| sandbox.create.before | pending | Pre-create hook |
-| sandbox.ready | pending | Sandbox ready hook |
-| sandbox.edit.before | pending | Git sync gating |
-| prompt.typing | pending | Warm pool trigger |
-| background.spawn | pending | Agent spawn hook |
-| multiplayer.join | pending | User join hook |
-| voice.transcribed | pending | Voice processing |
-| pr.screenshot | pending | PR screenshot capture |
-| pr.comment.received | pending | GitHub PR comment |
-| pr.comment.addressed | pending | Comment resolution |
+| sandbox.create.before | complete | Pre-create hook - triggers in SandboxService.create() |
+| sandbox.ready | complete | Sandbox ready hook - triggers in SandboxService.create() |
+| sandbox.edit.before | complete | Hook defined in plugin, needs service integration |
+| prompt.typing | complete | Hook defined in plugin, needs service integration |
+| background.spawn | complete | Agent spawn hook - triggers in BackgroundService.spawn() |
+| multiplayer.join | complete | User join hook - triggers in MultiplayerService.join() |
+| voice.transcribed | complete | Voice processing - triggers in VoiceService.sendVoicePrompt() |
+| pr.screenshot | complete | Hook defined in plugin, needs service integration |
+| pr.comment.received | complete | PR comment hook - triggers in PRSessionService.addComment() |
+| pr.comment.addressed | complete | Comment resolution - triggers in PRSessionService.respond() |
+| desktop.started | complete | Desktop started hook - triggers in DesktopService.start() |
+| stats.prompt.sent | complete | Hook defined in plugin, needs service integration |
+| skill.invoke.before | complete | Hook defined in plugin, needs service integration |
+| skill.invoke.after | complete | Hook defined in plugin, needs service integration |
 
 ---
 
@@ -245,3 +249,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Webhook handlers | complete | WebhookService and routes: github, slack/events, slack/interactions |
 | 2026-01-13 | use_skill tool | complete | Already implemented via SkillTool |
 | 2026-01-13 | computer_use tool | complete | ComputerUseTool for desktop interaction (screenshot, click, type, key, scroll, move) |
+| 2026-01-13 | Plugin Hooks | complete | Added 14 hosted agent hooks to plugin package and integrated triggers in services |

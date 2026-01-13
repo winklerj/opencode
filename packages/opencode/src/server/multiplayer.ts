@@ -160,13 +160,13 @@ export const MultiplayerRoute = new Hono()
       const { sessionID } = c.req.valid("param")
       const body = c.req.valid("json")
 
-      const user = await MultiplayerService.join(sessionID, body)
+      const result = await MultiplayerService.join(sessionID, body)
 
-      if (!user) {
+      if (!result.user) {
         return c.json({ error: "Failed to join session (not found or full)" }, 400)
       }
 
-      return c.json(user)
+      return c.json(result.user)
     },
   )
   // POST /multiplayer/:sessionID/leave - Leave session

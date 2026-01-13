@@ -2,6 +2,7 @@ import { Instance } from "../project/instance"
 import { SessionManager, type SessionManagerConfig } from "@opencode-ai/multiplayer"
 import type { Multiplayer } from "@opencode-ai/multiplayer"
 import { PromptQueue, type Prompt, type PromptPriority } from "@opencode-ai/background"
+import { Plugin } from "../plugin"
 
 /**
  * MultiplayerService provides a singleton SessionManager for the project.
@@ -60,14 +61,39 @@ export namespace MultiplayerService {
   }
 
   /**
-   * Join a session
+   * Join a session.
+   * Triggers multiplayer.join hook to allow plugins to configure user permissions.
    */
   export async function join(
     sessionID: string,
     input: Multiplayer.JoinInput,
-  ): Promise<Multiplayer.User | null> {
+  ): Promise<{ user: Multiplayer.User | null; permissions?: Array<{ path?: string; tool?: string; allow: boolean }> }> {
     const manager = await getManager()
-    return manager.join(sessionID, input)
+    const user = await manager.join(sessionID, input)
+
+    if (!user) {
+      return { user: null }
+    }
+
+    // Trigger hook to get permissions for the joining user
+    const hookOutput = await Plugin.trigger(
+      "multiplayer.join",
+      {
+        sessionID,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          color: user.color,
+        },
+      },
+      {
+        permissions: undefined,
+      },
+    )
+
+    return { user, permissions: hookOutput.permissions }
   }
 
   /**

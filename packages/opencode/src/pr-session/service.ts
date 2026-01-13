@@ -3,6 +3,7 @@ import { Log } from "../util/log"
 import { NamedError } from "@opencode-ai/util/error"
 import { Bus } from "@/bus"
 import { BusEvent } from "@/bus/bus-event"
+import { Plugin } from "../plugin"
 
 /**
  * PR Session Service
@@ -185,9 +186,13 @@ export namespace PRSessionService {
   }
 
   /**
-   * Add a comment to a PR session
+   * Add a comment to a PR session.
+   * Triggers pr.comment.received hook to allow plugins to decide whether to create a session.
    */
-  export function addComment(prNumber: number, comment: Omit<Comment, "prNumber">): Comment {
+  export async function addComment(
+    prNumber: number,
+    comment: Omit<Comment, "prNumber">,
+  ): Promise<{ comment: Comment; shouldCreateSession: boolean; prompt?: string }> {
     const session = prSessions.get(prNumber)
     if (!session) {
       throw new NotFoundError({ prNumber })
@@ -201,14 +206,40 @@ export namespace PRSessionService {
     session.comments.push(fullComment)
     session.updatedAt = Date.now()
 
+    // Trigger hook to decide if session should be created for this comment
+    const hookOutput = await Plugin.trigger(
+      "pr.comment.received",
+      {
+        repository: session.repository,
+        prNumber,
+        commentID: parseInt(comment.id, 10) || 0,
+        author: comment.author,
+        body: comment.body,
+        file: comment.path,
+        line: comment.line,
+      },
+      {
+        createSession: false,
+        prompt: undefined,
+      },
+    )
+
     log.info("comment added to PR session", { prNumber, commentID: comment.id })
-    return fullComment
+    return {
+      comment: fullComment,
+      shouldCreateSession: hookOutput.createSession,
+      prompt: hookOutput.prompt,
+    }
   }
 
   /**
-   * Respond to a PR comment
+   * Respond to a PR comment.
+   * Triggers pr.comment.addressed hook to allow plugins to customize the response.
    */
-  export async function respond(prNumber: number, input: RespondInput): Promise<Comment> {
+  export async function respond(
+    prNumber: number,
+    input: RespondInput & { commitSHA?: string; summary?: string },
+  ): Promise<{ comment: Comment; responseBody?: string }> {
     log.info("responding to PR comment", { prNumber, commentID: input.commentID })
 
     const session = prSessions.get(prNumber)
@@ -227,15 +258,33 @@ export namespace PRSessionService {
     comment.addressedAt = Date.now()
     session.updatedAt = Date.now()
 
+    // Trigger hook to customize response
+    const hookOutput = await Plugin.trigger(
+      "pr.comment.addressed",
+      {
+        repository: session.repository,
+        prNumber,
+        commentID: parseInt(input.commentID, 10) || 0,
+        commitSHA: input.commitSHA ?? "",
+        summary: input.summary ?? input.response,
+      },
+      {
+        responseBody: undefined,
+      },
+    )
+
     // In production, this would post the response to GitHub
     await Bus.publish(Event.CommentAddressed, {
       prNumber,
       commentID: input.commentID,
-      response: input.response,
+      response: hookOutput.responseBody ?? input.response,
     })
 
     log.info("PR comment responded", { prNumber, commentID: input.commentID })
-    return comment
+    return {
+      comment,
+      responseBody: hookOutput.responseBody,
+    }
   }
 
   /**
