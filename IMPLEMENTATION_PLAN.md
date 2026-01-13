@@ -72,12 +72,13 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 2.3 Background Agent API (`/background/*`)
 | Task | Status | Notes |
 |------|--------|-------|
-| POST /background/spawn | pending | Spawn agent |
-| GET /background/:id | pending | Get agent status |
-| GET /background | pending | List agents |
-| POST /background/:id/cancel | pending | Cancel agent |
-| GET /background/:id/output | pending | Get output |
-| GET /background/:id/events | pending | Stream events (SSE) |
+| POST /background/spawn | complete | Spawn agent |
+| GET /background/:id | complete | Get agent status |
+| GET /background | complete | List agents |
+| POST /background/:id/cancel | complete | Cancel agent |
+| GET /background/:id/output | complete | Get output |
+| GET /background/:id/events | complete | Stream events (SSE) |
+| GET /background/stats | complete | Get scheduler statistics |
 
 ### 2.4 Additional APIs
 | Task | Status | Notes |
@@ -204,3 +205,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | spawn_session tool | complete | Tool for spawning background agents with BackgroundService |
 | 2026-01-13 | check_session tool | complete | Tool for checking background agent status |
 | 2026-01-13 | BackgroundService | complete | Singleton service for agent scheduling in opencode |
+| 2026-01-13 | Background Agent API | complete | Full API: spawn, get, list, cancel, output, events (SSE), stats |
