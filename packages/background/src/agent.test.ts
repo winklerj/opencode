@@ -221,7 +221,7 @@ describe("Status Transitions", () => {
 describe("TLA+ Invariants", () => {
   describe("ValidAgentStatusTransitions", () => {
     it("all defined statuses should be in AgentStatus enum", () => {
-      const allStatuses = Object.keys(VALID_TRANSITIONS)
+      const allStatuses = Object.keys(VALID_TRANSITIONS) as AgentStatus[]
       for (const status of allStatuses) {
         expect(AgentStatus.options).toContain(status)
       }

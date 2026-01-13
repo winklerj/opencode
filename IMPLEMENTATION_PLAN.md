@@ -97,8 +97,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 3.1 New Tools
 | Task | Status | Notes |
 |------|--------|-------|
-| spawn_session tool | pending | Spawn parallel sessions |
-| check_session tool | pending | Check spawned session status |
+| spawn_session tool | complete | Spawn parallel sessions via BackgroundService |
+| check_session tool | complete | Check spawned session status |
 | use_skill tool | pending | Apply predefined skills |
 | computer_use tool | pending | Desktop interaction |
 
@@ -201,3 +201,6 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | User presence/awareness | complete | Cursor tracking, user colors, event subscription |
 | 2026-01-13 | Edit locks | complete | acquireLock/releaseLock/canEdit with single writer invariant |
 | 2026-01-13 | Client management | complete | Multi-client support with configurable limits |
+| 2026-01-13 | spawn_session tool | complete | Tool for spawning background agents with BackgroundService |
+| 2026-01-13 | check_session tool | complete | Tool for checking background agent status |
+| 2026-01-13 | BackgroundService | complete | Singleton service for agent scheduling in opencode |

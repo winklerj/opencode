@@ -16,8 +16,14 @@ export type ResourceLimits = z.input<typeof ResourceLimits>
  * Full scheduler configuration
  */
 export const FullSchedulerConfig = z.object({
-  limits: ResourceLimits.default({}),
-  spawner: SpawnerConfig.default({}),
+  limits: ResourceLimits.default({
+    maxConcurrent: 5,
+    maxQueued: 100,
+    maxPerSession: 10,
+  }),
+  spawner: SpawnerConfig.default({
+    maxAgents: 1000,
+  }),
   initTimeout: z.number().default(120000), // 2 min to initialize
   runTimeout: z.number().default(3600000), // 1 hour max run time
   autoProcess: z.boolean().default(false), // Auto-process queue on spawn
