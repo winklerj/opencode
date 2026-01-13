@@ -81,8 +81,15 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | GET /multiplayer/:sessionID/users | complete | Get users |
 | GET /multiplayer/:sessionID/clients | complete | Get clients |
 | PUT /multiplayer/:sessionID/state | complete | Update state |
-| POST /multiplayer/:sessionID/prompt | pending | Queue prompt |
-| DELETE /multiplayer/:sessionID/prompt/:id | pending | Cancel prompt |
+| POST /multiplayer/:sessionID/prompt | complete | Queue prompt |
+| GET /multiplayer/:sessionID/prompts | complete | Get all prompts |
+| GET /multiplayer/:sessionID/prompt/:id | complete | Get specific prompt |
+| DELETE /multiplayer/:sessionID/prompt/:id | complete | Cancel prompt |
+| PUT /multiplayer/:sessionID/prompt/:id/reorder | complete | Reorder prompt |
+| GET /multiplayer/:sessionID/queue/status | complete | Queue status |
+| POST /multiplayer/:sessionID/queue/start | complete | Start next prompt |
+| POST /multiplayer/:sessionID/queue/complete | complete | Complete prompt |
+| GET /multiplayer/:sessionID/queue/executing | complete | Get executing prompt |
 | GET /multiplayer/:sessionID/ws | pending | WebSocket connection |
 
 ### 2.3 Background Agent API (`/background/*`)
@@ -226,3 +233,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Multiplayer API | complete | Full API: CRUD sessions, join/leave, cursor, locks, clients, state |
 | 2026-01-13 | SandboxService | complete | Singleton service wrapping Provider, WarmPool, SnapshotManager |
 | 2026-01-13 | Sandbox API | complete | Full API: CRUD, lifecycle, exec, logs, git, snapshots, warm pool |
+| 2026-01-13 | Prompt Queue API | complete | Full API: add, list, get, cancel, reorder, status, start, complete |

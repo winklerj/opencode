@@ -1,6 +1,7 @@
 import { Instance } from "../project/instance"
 import { SessionManager, type SessionManagerConfig } from "@opencode-ai/multiplayer"
 import type { Multiplayer } from "@opencode-ai/multiplayer"
+import { PromptQueue, type Prompt, type PromptPriority } from "@opencode-ai/background"
 
 /**
  * MultiplayerService provides a singleton SessionManager for the project.
@@ -167,5 +168,158 @@ export namespace MultiplayerService {
   ): Promise<() => void> {
     const manager = await getManager()
     return manager.subscribe(listener)
+  }
+
+  // ============================================
+  // Prompt Queue Management
+  // ============================================
+
+  /**
+   * Map of session ID to PromptQueue instance
+   */
+  const promptQueues = new Map<string, PromptQueue>()
+
+  /**
+   * Get or create a prompt queue for a session
+   */
+  function getQueue(sessionID: string): PromptQueue {
+    let queue = promptQueues.get(sessionID)
+    if (!queue) {
+      queue = new PromptQueue(sessionID, {
+        maxPrompts: 100,
+        allowReorder: true,
+      })
+      promptQueues.set(sessionID, queue)
+    }
+    return queue
+  }
+
+  /**
+   * Add a prompt to the session queue
+   */
+  export async function addPrompt(
+    sessionID: string,
+    userID: string,
+    content: string,
+    priority?: PromptPriority,
+  ): Promise<Prompt | null> {
+    const session = await get(sessionID)
+    if (!session) return null
+
+    // Check if user is in session
+    const users = await getUsers(sessionID)
+    if (!users.some((u) => u.id === userID)) return null
+
+    const queue = getQueue(sessionID)
+    try {
+      return queue.add(userID, content, priority)
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Get all prompts in the session queue
+   */
+  export async function getPrompts(sessionID: string): Promise<Prompt[]> {
+    const session = await get(sessionID)
+    if (!session) return []
+
+    return getQueue(sessionID).all()
+  }
+
+  /**
+   * Get a specific prompt by ID
+   */
+  export async function getPrompt(sessionID: string, promptID: string): Promise<Prompt | undefined> {
+    const session = await get(sessionID)
+    if (!session) return undefined
+
+    return getQueue(sessionID).get(promptID)
+  }
+
+  /**
+   * Cancel a prompt in the queue
+   */
+  export async function cancelPrompt(
+    sessionID: string,
+    promptID: string,
+    userID: string,
+  ): Promise<boolean> {
+    const session = await get(sessionID)
+    if (!session) return false
+
+    return getQueue(sessionID).cancel(promptID, userID)
+  }
+
+  /**
+   * Reorder a prompt in the queue
+   */
+  export async function reorderPrompt(
+    sessionID: string,
+    promptID: string,
+    userID: string,
+    newIndex: number,
+  ): Promise<boolean> {
+    const session = await get(sessionID)
+    if (!session) return false
+
+    return getQueue(sessionID).reorder(promptID, userID, newIndex)
+  }
+
+  /**
+   * Start executing the next prompt in the queue
+   */
+  export async function startNextPrompt(sessionID: string): Promise<Prompt | undefined> {
+    const session = await get(sessionID)
+    if (!session) return undefined
+
+    return getQueue(sessionID).startNext()
+  }
+
+  /**
+   * Complete the currently executing prompt
+   */
+  export async function completePrompt(sessionID: string): Promise<Prompt | undefined> {
+    const session = await get(sessionID)
+    if (!session) return undefined
+
+    return getQueue(sessionID).complete()
+  }
+
+  /**
+   * Get the currently executing prompt
+   */
+  export async function getExecutingPrompt(sessionID: string): Promise<Prompt | undefined> {
+    const session = await get(sessionID)
+    if (!session) return undefined
+
+    return getQueue(sessionID).executing()
+  }
+
+  /**
+   * Get queue status
+   */
+  export async function getQueueStatus(sessionID: string): Promise<{
+    length: number
+    hasExecuting: boolean
+    isFull: boolean
+  } | null> {
+    const session = await get(sessionID)
+    if (!session) return null
+
+    const queue = getQueue(sessionID)
+    return {
+      length: queue.length,
+      hasExecuting: queue.hasExecuting(),
+      isFull: queue.isFull(),
+    }
+  }
+
+  /**
+   * Clean up prompt queue when session is deleted
+   */
+  export function cleanupQueue(sessionID: string): void {
+    promptQueues.delete(sessionID)
   }
 }

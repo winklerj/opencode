@@ -3,6 +3,7 @@ import { describeRoute, validator, resolver } from "hono-openapi"
 import { upgradeWebSocket } from "hono/bun"
 import { MultiplayerService } from "../multiplayer/service"
 import { Multiplayer } from "@opencode-ai/multiplayer"
+import { Prompt, PromptPriority } from "@opencode-ai/background"
 import z from "zod"
 import { errors } from "./error"
 
@@ -475,5 +476,295 @@ export const MultiplayerRoute = new Hono()
       }
 
       return c.json({ success: true })
+    },
+  )
+  // ============================================
+  // Prompt Queue Endpoints
+  // ============================================
+  // POST /multiplayer/:sessionID/prompt - Add prompt to queue
+  .post(
+    "/:sessionID/prompt",
+    describeRoute({
+      summary: "Queue prompt",
+      description: "Add a prompt to the session queue.",
+      operationId: "multiplayer.queuePrompt",
+      responses: {
+        200: {
+          description: "Prompt queued",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt),
+            },
+          },
+        },
+        ...errors(400, 404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    validator(
+      "json",
+      z.object({
+        userID: z.string().describe("ID of the user submitting the prompt"),
+        content: z.string().describe("The prompt content"),
+        priority: PromptPriority.optional().describe("Priority level (normal, high, urgent)"),
+      }),
+    ),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const { userID, content, priority } = c.req.valid("json")
+
+      const prompt = await MultiplayerService.addPrompt(sessionID, userID, content, priority)
+
+      if (!prompt) {
+        return c.json({ error: "Failed to queue prompt (session not found or user not in session)" }, 400)
+      }
+
+      return c.json(prompt)
+    },
+  )
+  // GET /multiplayer/:sessionID/prompts - Get all prompts in queue
+  .get(
+    "/:sessionID/prompts",
+    describeRoute({
+      summary: "Get prompt queue",
+      description: "Get all prompts in the session queue.",
+      operationId: "multiplayer.getPrompts",
+      responses: {
+        200: {
+          description: "List of prompts",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt.array()),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const prompts = await MultiplayerService.getPrompts(sessionID)
+      return c.json(prompts)
+    },
+  )
+  // GET /multiplayer/:sessionID/prompt/:promptID - Get specific prompt
+  .get(
+    "/:sessionID/prompt/:promptID",
+    describeRoute({
+      summary: "Get prompt",
+      description: "Get a specific prompt by ID.",
+      operationId: "multiplayer.getPrompt",
+      responses: {
+        200: {
+          description: "Prompt information",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string(), promptID: z.string() })),
+    async (c) => {
+      const { sessionID, promptID } = c.req.valid("param")
+      const prompt = await MultiplayerService.getPrompt(sessionID, promptID)
+
+      if (!prompt) {
+        return c.json({ error: "Prompt not found" }, 404)
+      }
+
+      return c.json(prompt)
+    },
+  )
+  // DELETE /multiplayer/:sessionID/prompt/:promptID - Cancel prompt
+  .delete(
+    "/:sessionID/prompt/:promptID",
+    describeRoute({
+      summary: "Cancel prompt",
+      description: "Cancel a queued prompt (users can only cancel their own prompts).",
+      operationId: "multiplayer.cancelPrompt",
+      responses: {
+        200: {
+          description: "Prompt cancelled",
+          content: {
+            "application/json": {
+              schema: resolver(z.object({ success: z.boolean() })),
+            },
+          },
+        },
+        ...errors(400, 404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string(), promptID: z.string() })),
+    validator("json", z.object({ userID: z.string() })),
+    async (c) => {
+      const { sessionID, promptID } = c.req.valid("param")
+      const { userID } = c.req.valid("json")
+
+      const success = await MultiplayerService.cancelPrompt(sessionID, promptID, userID)
+
+      if (!success) {
+        return c.json({ error: "Failed to cancel prompt (not found, already executing, or not your prompt)" }, 400)
+      }
+
+      return c.json({ success: true })
+    },
+  )
+  // PUT /multiplayer/:sessionID/prompt/:promptID/reorder - Reorder prompt
+  .put(
+    "/:sessionID/prompt/:promptID/reorder",
+    describeRoute({
+      summary: "Reorder prompt",
+      description: "Move a prompt to a new position in the queue (users can only reorder their own prompts).",
+      operationId: "multiplayer.reorderPrompt",
+      responses: {
+        200: {
+          description: "Prompt reordered",
+          content: {
+            "application/json": {
+              schema: resolver(z.object({ success: z.boolean() })),
+            },
+          },
+        },
+        ...errors(400, 404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string(), promptID: z.string() })),
+    validator(
+      "json",
+      z.object({
+        userID: z.string(),
+        newIndex: z.number().describe("New position in the queue (0-based)"),
+      }),
+    ),
+    async (c) => {
+      const { sessionID, promptID } = c.req.valid("param")
+      const { userID, newIndex } = c.req.valid("json")
+
+      const success = await MultiplayerService.reorderPrompt(sessionID, promptID, userID, newIndex)
+
+      if (!success) {
+        return c.json({ error: "Failed to reorder prompt" }, 400)
+      }
+
+      return c.json({ success: true })
+    },
+  )
+  // GET /multiplayer/:sessionID/queue/status - Get queue status
+  .get(
+    "/:sessionID/queue/status",
+    describeRoute({
+      summary: "Get queue status",
+      description: "Get the current status of the prompt queue.",
+      operationId: "multiplayer.queueStatus",
+      responses: {
+        200: {
+          description: "Queue status",
+          content: {
+            "application/json": {
+              schema: resolver(
+                z.object({
+                  length: z.number(),
+                  hasExecuting: z.boolean(),
+                  isFull: z.boolean(),
+                }),
+              ),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const status = await MultiplayerService.getQueueStatus(sessionID)
+
+      if (!status) {
+        return c.json({ error: "Session not found" }, 404)
+      }
+
+      return c.json(status)
+    },
+  )
+  // POST /multiplayer/:sessionID/queue/start - Start next prompt
+  .post(
+    "/:sessionID/queue/start",
+    describeRoute({
+      summary: "Start next prompt",
+      description: "Start executing the next prompt in the queue.",
+      operationId: "multiplayer.startNextPrompt",
+      responses: {
+        200: {
+          description: "Prompt started or null if none available",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt.nullable()),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const prompt = await MultiplayerService.startNextPrompt(sessionID)
+      return c.json(prompt ?? null)
+    },
+  )
+  // POST /multiplayer/:sessionID/queue/complete - Complete current prompt
+  .post(
+    "/:sessionID/queue/complete",
+    describeRoute({
+      summary: "Complete current prompt",
+      description: "Mark the currently executing prompt as complete.",
+      operationId: "multiplayer.completePrompt",
+      responses: {
+        200: {
+          description: "Completed prompt or null if none executing",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt.nullable()),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const prompt = await MultiplayerService.completePrompt(sessionID)
+      return c.json(prompt ?? null)
+    },
+  )
+  // GET /multiplayer/:sessionID/queue/executing - Get currently executing prompt
+  .get(
+    "/:sessionID/queue/executing",
+    describeRoute({
+      summary: "Get executing prompt",
+      description: "Get the currently executing prompt.",
+      operationId: "multiplayer.executingPrompt",
+      responses: {
+        200: {
+          description: "Executing prompt or null",
+          content: {
+            "application/json": {
+              schema: resolver(Prompt.nullable()),
+            },
+          },
+        },
+        ...errors(404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    async (c) => {
+      const { sessionID } = c.req.valid("param")
+      const prompt = await MultiplayerService.getExecutingPrompt(sessionID)
+      return c.json(prompt ?? null)
     },
   )
