@@ -2,10 +2,11 @@ import { Hono } from "hono"
 import { describeRoute, validator, resolver } from "hono-openapi"
 import { upgradeWebSocket } from "hono/bun"
 import { MultiplayerService } from "../multiplayer/service"
-import { Multiplayer } from "@opencode-ai/multiplayer"
+import { Multiplayer, WebSocketMessage, type MultiplayerEvent } from "@opencode-ai/multiplayer"
 import { Prompt, PromptPriority } from "@opencode-ai/background"
 import z from "zod"
 import { errors } from "./error"
+import type { WSContext } from "hono/ws"
 
 /**
  * Multiplayer API Routes
@@ -768,3 +769,191 @@ export const MultiplayerRoute = new Hono()
       return c.json(prompt ?? null)
     },
   )
+  // GET /multiplayer/:sessionID/ws - WebSocket connection for real-time sync
+  .get(
+    "/:sessionID/ws",
+    describeRoute({
+      summary: "WebSocket connection",
+      description:
+        "Establish a WebSocket connection for real-time multiplayer sync. " +
+        "Clients receive events for user join/leave, cursor updates, lock changes, and state changes. " +
+        "Clients can send cursor updates, lock requests, and ping messages.",
+      operationId: "multiplayer.websocket",
+      responses: {
+        101: {
+          description: "WebSocket upgrade successful",
+        },
+        ...errors(400, 404),
+      },
+    }),
+    validator("param", z.object({ sessionID: z.string() })),
+    validator(
+      "query",
+      z.object({
+        userID: z.string().describe("User ID for the WebSocket connection"),
+        clientType: Multiplayer.ClientType.optional().describe("Client type (defaults to web)"),
+      }),
+    ),
+    upgradeWebSocket((c) => {
+      const { sessionID } = c.req.param() as { sessionID: string }
+      const query = c.req.query()
+      const userID = query.userID
+      const clientType = (query.clientType as Multiplayer.ClientType) || "web"
+
+      let client: Multiplayer.Client | null = null
+      let unsubscribe: (() => void) | null = null
+      let wsRef: WSContext | null = null
+
+      return {
+        async onOpen(_event, ws) {
+          wsRef = ws
+
+          // Check if session exists
+          const session = await MultiplayerService.get(sessionID)
+          if (!session) {
+            sendMessage(ws, {
+              type: "error",
+              message: "Session not found",
+              code: "SESSION_NOT_FOUND",
+            })
+            ws.close(1008, "Session not found")
+            return
+          }
+
+          // Check if user is in session
+          const users = await MultiplayerService.getUsers(sessionID)
+          if (!users.some((u) => u.id === userID)) {
+            sendMessage(ws, {
+              type: "error",
+              message: "User not in session",
+              code: "USER_NOT_IN_SESSION",
+            })
+            ws.close(1008, "User not in session")
+            return
+          }
+
+          // Connect client
+          client = await MultiplayerService.connect(sessionID, {
+            userID,
+            type: clientType,
+          })
+
+          if (!client) {
+            sendMessage(ws, {
+              type: "error",
+              message: "Failed to connect client (limit reached)",
+              code: "CLIENT_LIMIT_REACHED",
+            })
+            ws.close(1008, "Client limit reached")
+            return
+          }
+
+          // Send initial session snapshot
+          const currentSession = await MultiplayerService.get(sessionID)
+          if (currentSession) {
+            sendMessage(ws, {
+              type: "session.snapshot",
+              session: currentSession,
+            })
+          }
+
+          // Subscribe to session events
+          unsubscribe = await MultiplayerService.subscribe((event: MultiplayerEvent) => {
+            // Only forward events for this session
+            if ("sessionID" in event && event.sessionID !== sessionID) {
+              return
+            }
+            // Forward the event to the client
+            sendMessage(ws, event)
+          })
+        },
+
+        async onMessage(event) {
+          if (!client || !wsRef) return
+
+          try {
+            const data = JSON.parse(String(event.data))
+            const parsed = WebSocketMessage.ClientMessage.safeParse(data)
+
+            if (!parsed.success) {
+              sendMessage(wsRef, {
+                type: "error",
+                message: "Invalid message format",
+                code: "INVALID_MESSAGE",
+              })
+              return
+            }
+
+            const message = parsed.data
+
+            switch (message.type) {
+              case "cursor.update":
+                await MultiplayerService.updateCursor(sessionID, userID, message.cursor)
+                break
+
+              case "lock.acquire":
+                const acquired = await MultiplayerService.acquireLock(sessionID, userID)
+                if (!acquired) {
+                  const session = await MultiplayerService.get(sessionID)
+                  sendMessage(wsRef, {
+                    type: "error",
+                    message: session?.state.editLock
+                      ? `Lock held by ${session.state.editLock}`
+                      : "Failed to acquire lock",
+                    code: "LOCK_HELD",
+                  })
+                }
+                break
+
+              case "lock.release":
+                await MultiplayerService.releaseLock(sessionID, userID)
+                break
+
+              case "ping":
+                sendMessage(wsRef, { type: "pong" })
+                break
+            }
+          } catch {
+            sendMessage(wsRef, {
+              type: "error",
+              message: "Failed to parse message",
+              code: "PARSE_ERROR",
+            })
+          }
+        },
+
+        async onClose() {
+          // Unsubscribe from events
+          if (unsubscribe) {
+            unsubscribe()
+          }
+
+          // Disconnect client
+          if (client) {
+            await MultiplayerService.disconnect(sessionID, client.id)
+          }
+        },
+
+        onError() {
+          // Cleanup on error
+          if (unsubscribe) {
+            unsubscribe()
+          }
+          if (client) {
+            MultiplayerService.disconnect(sessionID, client.id)
+          }
+        },
+      }
+    }),
+  )
+
+/**
+ * Send a message over WebSocket with proper JSON serialization
+ */
+function sendMessage(ws: WSContext, message: WebSocketMessage.ServerMessage): void {
+  try {
+    ws.send(JSON.stringify(message))
+  } catch {
+    // Ignore send errors (connection may be closing)
+  }
+}

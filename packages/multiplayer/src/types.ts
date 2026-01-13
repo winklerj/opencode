@@ -158,3 +158,88 @@ export type MultiplayerEvent =
   | { type: "lock.acquired"; sessionID: string; userID: string }
   | { type: "lock.released"; sessionID: string; userID: string }
   | { type: "state.changed"; sessionID: string; state: Multiplayer.SessionState }
+
+/**
+ * WebSocket message types from client to server
+ */
+export namespace WebSocketMessage {
+  /**
+   * Client sends cursor update
+   */
+  export const CursorUpdate = z.object({
+    type: z.literal("cursor.update"),
+    cursor: Multiplayer.Cursor,
+  })
+  export type CursorUpdate = z.infer<typeof CursorUpdate>
+
+  /**
+   * Client requests edit lock
+   */
+  export const LockAcquire = z.object({
+    type: z.literal("lock.acquire"),
+  })
+  export type LockAcquire = z.infer<typeof LockAcquire>
+
+  /**
+   * Client releases edit lock
+   */
+  export const LockRelease = z.object({
+    type: z.literal("lock.release"),
+  })
+  export type LockRelease = z.infer<typeof LockRelease>
+
+  /**
+   * Client sends a ping to keep connection alive
+   */
+  export const Ping = z.object({
+    type: z.literal("ping"),
+  })
+  export type Ping = z.infer<typeof Ping>
+
+  /**
+   * All possible client messages
+   */
+  export const ClientMessage = z.discriminatedUnion("type", [
+    CursorUpdate,
+    LockAcquire,
+    LockRelease,
+    Ping,
+  ])
+  export type ClientMessage = z.infer<typeof ClientMessage>
+
+  /**
+   * Server sends a pong in response to ping
+   */
+  export const Pong = z.object({
+    type: z.literal("pong"),
+  })
+  export type Pong = z.infer<typeof Pong>
+
+  /**
+   * Server sends session snapshot on connect
+   */
+  export const SessionSnapshot = z.object({
+    type: z.literal("session.snapshot"),
+    session: Multiplayer.Session,
+  })
+  export type SessionSnapshot = z.infer<typeof SessionSnapshot>
+
+  /**
+   * Server sends error message
+   */
+  export const Error = z.object({
+    type: z.literal("error"),
+    message: z.string(),
+    code: z.string().optional(),
+  })
+  export type Error = z.infer<typeof Error>
+
+  /**
+   * All possible server messages (includes events + control messages)
+   */
+  export type ServerMessage =
+    | MultiplayerEvent
+    | Pong
+    | SessionSnapshot
+    | Error
+}

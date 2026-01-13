@@ -36,7 +36,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Client management | complete | HostedAgent.tla | Multi-client per user with limits |
 | Durable Object state | pending | HostedAgent.tla | Cloudflare DO integration |
 | SQLite state fallback | pending | - | Local/memory fallback |
-| WebSocket sync | pending | - | Real-time updates |
+| WebSocket sync | complete | - | Real-time updates via /multiplayer/:id/ws |
 | Conflict resolution | pending | - | Edit conflict handling |
 
 ---
@@ -90,7 +90,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | POST /multiplayer/:sessionID/queue/start | complete | Start next prompt |
 | POST /multiplayer/:sessionID/queue/complete | complete | Complete prompt |
 | GET /multiplayer/:sessionID/queue/executing | complete | Get executing prompt |
-| GET /multiplayer/:sessionID/ws | pending | WebSocket connection |
+| GET /multiplayer/:sessionID/ws | complete | WebSocket connection for real-time sync |
 
 ### 2.3 Background Agent API (`/background/*`)
 | Task | Status | Notes |
@@ -212,6 +212,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Date | Task | Status | Notes |
 |------|------|--------|-------|
+| 2026-01-13 | Multiplayer WebSocket endpoint | complete | Real-time sync with cursor/lock/state events, client message handling |
 | 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
 | 2026-01-13 | Local provider implementation | complete | Full provider with tests |
 | 2026-01-13 | Warm pool manager | complete | WarmPoolManager with claim/release/warm/onTyping |
