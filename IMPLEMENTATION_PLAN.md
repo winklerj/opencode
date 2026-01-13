@@ -17,7 +17,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Image builder | pending | - | 30-min rebuild cycle |
 | Image registry | pending | - | Tagging strategy |
 | Snapshot manager | pending | SandboxSnapshot.tla | Create/restore snapshots |
-| Git sync gating | pending | GitSyncGating.tla | Block writes until synced |
+| Git sync gating | complete | GitSyncGating.tla | SyncGate blocks writes until synced |
 
 ### 1.2 Background Agent Package (`packages/background/`)
 | Task | Status | TLA+ | Notes |
@@ -189,3 +189,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
 | 2026-01-13 | Local provider implementation | complete | Full provider with tests |
 | 2026-01-13 | Warm pool manager | complete | WarmPoolManager with claim/release/warm/onTyping |
+| 2026-01-13 | Git sync gating | complete | SyncGate with read/write tool classification |
