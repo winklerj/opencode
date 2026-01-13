@@ -30,12 +30,14 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 1.3 Multiplayer Package (`packages/multiplayer/`)
 | Task | Status | TLA+ | Notes |
 |------|--------|------|-------|
+| Session manager | complete | HostedAgent.tla | SessionManager with create/join/leave/connect |
+| User presence/awareness | complete | HostedAgent.tla | Cursor tracking, user colors |
+| Edit locks | complete | HostedAgent.tla | Single writer guarantee with acquire/release |
+| Client management | complete | HostedAgent.tla | Multi-client per user with limits |
 | Durable Object state | pending | HostedAgent.tla | Cloudflare DO integration |
 | SQLite state fallback | pending | - | Local/memory fallback |
 | WebSocket sync | pending | - | Real-time updates |
 | Conflict resolution | pending | - | Edit conflict handling |
-| User presence/awareness | pending | HostedAgent.tla | Cursor tracking |
-| Edit locks | pending | HostedAgent.tla | Single writer guarantee |
 
 ---
 
@@ -195,3 +197,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Scheduler | complete | AgentScheduler with maxConcurrent, maxQueued, maxPerSession limits |
 | 2026-01-13 | Status tracking | complete | Agent types, VALID_TRANSITIONS, isTerminal helper |
 | 2026-01-13 | Snapshot manager | complete | SnapshotManager with create/restore/expire/cleanup |
+| 2026-01-13 | Session manager | complete | SessionManager with user join/leave, client connect/disconnect |
+| 2026-01-13 | User presence/awareness | complete | Cursor tracking, user colors, event subscription |
+| 2026-01-13 | Edit locks | complete | acquireLock/releaseLock/canEdit with single writer invariant |
+| 2026-01-13 | Client management | complete | Multi-client support with configurable limits |
