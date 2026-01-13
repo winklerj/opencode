@@ -37,6 +37,8 @@ import { SandboxRoute } from "./sandbox"
 import { SkillsRoute } from "./skills"
 import { StatsRoute } from "./stats"
 import { VoiceRoute } from "./voice"
+import { DesktopRoute } from "./desktop"
+import { EditorRoute } from "./editor"
 import { ToolRegistry } from "../tool/registry"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import { SessionPrompt } from "../session/prompt"
@@ -301,6 +303,8 @@ export namespace Server {
         .route("/skills", SkillsRoute)
         .route("/stats", StatsRoute)
         .route("/session/:sessionID/voice", VoiceRoute)
+        .route("/sandbox/:sandboxID/desktop", DesktopRoute)
+        .route("/sandbox/:sandboxID/editor", EditorRoute)
 
         .get(
           "/pty",

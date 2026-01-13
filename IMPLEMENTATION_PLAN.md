@@ -107,8 +107,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Task | Status | Notes |
 |------|--------|-------|
 | Voice API endpoints | complete | /session/:id/voice/* (start, stop, status, send) |
-| Desktop API endpoints | pending | /sandbox/:id/desktop/* |
-| Editor API endpoints | pending | /sandbox/:id/editor/* |
+| Desktop API endpoints | complete | /sandbox/:id/desktop/* (get, start, stop, screenshot, ws) |
+| Editor API endpoints | complete | /sandbox/:id/editor/* (get, start, stop) |
 | Stats API endpoints | complete | GET /stats, GET /stats/live, GET /stats/historical |
 | Skills API endpoints | complete | GET /skills, GET /skills/:name |
 | PR Session API endpoints | pending | /pr-session/* |
@@ -239,3 +239,5 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Sandbox API | complete | Full API: CRUD, lifecycle, exec, logs, git, snapshots, warm pool |
 | 2026-01-13 | Prompt Queue API | complete | Full API: add, list, get, cancel, reorder, status, start, complete |
 | 2026-01-13 | Voice API endpoints | complete | VoiceService and routes: start, stop, status, send (audio transcription) |
+| 2026-01-13 | Desktop API endpoints | complete | DesktopService and routes: get, start, stop, screenshot, websocket |
+| 2026-01-13 | Editor API endpoints | complete | EditorService and routes: get, start, stop (code-server integration) |
