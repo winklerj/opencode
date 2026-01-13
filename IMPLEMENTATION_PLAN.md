@@ -12,8 +12,8 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Provider interface definition | complete | HostedAgent.tla | Base interface for sandbox backends |
 | Local provider implementation | complete | - | Dev/test fallback with tests |
 | Modal provider implementation | pending | - | Production backend |
-| Warm pool manager | pending | WarmPool.tla | Pool lifecycle management |
-| Warm pool warmup (typing trigger) | pending | WarmPool.tla | Claim on keystroke |
+| Warm pool manager | complete | WarmPool.tla | Pool lifecycle with claim/release |
+| Warm pool warmup (typing trigger) | complete | WarmPool.tla | onTyping() hook for warmup |
 | Image builder | pending | - | 30-min rebuild cycle |
 | Image registry | pending | - | Tagging strategy |
 | Snapshot manager | pending | SandboxSnapshot.tla | Create/restore snapshots |
@@ -188,3 +188,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 |------|------|--------|-------|
 | 2026-01-13 | Provider interface definition | complete | Sandbox.Info, CreateInput, Provider interface |
 | 2026-01-13 | Local provider implementation | complete | Full provider with tests |
+| 2026-01-13 | Warm pool manager | complete | WarmPoolManager with claim/release/warm/onTyping |

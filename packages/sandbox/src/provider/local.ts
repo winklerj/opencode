@@ -48,6 +48,7 @@ export class LocalProvider implements Provider {
         name,
         status: "stopped" as const,
       })),
+      imageTag: input.imageTag ?? "latest",
       created: now,
       lastActivity: now,
     }
@@ -117,6 +118,7 @@ export class LocalProvider implements Provider {
       sandboxID,
       dir: snapshotDir,
       git: { ...sandbox.git },
+      imageTag: sandbox.imageTag,
       createdAt: Date.now(),
     })
 
@@ -142,6 +144,7 @@ export class LocalProvider implements Provider {
       status: "ready",
       git: { ...snapshot.git },
       services: [],
+      imageTag: snapshot.imageTag,
       created: now,
       lastActivity: now,
     }
@@ -235,8 +238,11 @@ export class LocalProvider implements Provider {
   }
 
   private async cloneRepository(sandbox: LocalSandbox, repo: string, branch: string): Promise<void> {
+    // Helper to check if sandbox was terminated (may happen concurrently)
+    const isTerminated = () => sandbox.status === ("terminated" as Sandbox.Status)
+
     // Don't modify terminated sandboxes
-    if (sandbox.status === "terminated") return
+    if (isTerminated()) return
 
     sandbox.git.syncStatus = "syncing"
 
@@ -252,7 +258,7 @@ export class LocalProvider implements Provider {
       }
 
       // Don't proceed if sandbox was terminated during check
-      if (sandbox.status === "terminated") return
+      if (isTerminated()) return
 
       const result = await this.execute(sandbox.id, ["git", "clone", "--branch", branch, "--single-branch", repo, "."])
 
@@ -261,7 +267,7 @@ export class LocalProvider implements Provider {
       }
 
       // Don't update status if sandbox was terminated during clone
-      if (sandbox.status === "terminated") return
+      if (isTerminated()) return
 
       // Get commit hash
       const commitResult = await this.execute(sandbox.id, ["git", "rev-parse", "HEAD"])
@@ -271,7 +277,7 @@ export class LocalProvider implements Provider {
       sandbox.status = "ready"
     } catch {
       // Don't update status if sandbox was terminated
-      if (sandbox.status === "terminated") return
+      if (isTerminated()) return
       sandbox.git.syncStatus = "error"
       sandbox.status = "ready" // Still usable, just without git
     }
@@ -285,7 +291,7 @@ export class LocalProvider implements Provider {
       provider: "local",
       image: {
         id: "local",
-        tag: "latest",
+        tag: sandbox.imageTag,
         digest: "local",
         builtAt: sandbox.created,
       },
@@ -311,6 +317,7 @@ interface LocalSandbox {
   status: Sandbox.Status
   git: Sandbox.Git
   services: Sandbox.Service[]
+  imageTag: string
   created: number
   lastActivity: number
 }
@@ -320,5 +327,6 @@ interface LocalSnapshot {
   sandboxID: string
   dir: string
   git: Sandbox.Git
+  imageTag: string
   createdAt: number
 }
