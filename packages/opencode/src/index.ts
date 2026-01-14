@@ -26,6 +26,8 @@ import { EOL } from "os"
 import { WebCommand } from "./cli/cmd/web"
 import { PrCommand } from "./cli/cmd/pr"
 import { SessionCommand } from "./cli/cmd/session"
+import { Telemetry } from "./telemetry/telemetry"
+import { Flag } from "./flag/flag"
 
 process.on("unhandledRejection", (e) => {
   Log.Default.error("rejection", {
@@ -66,6 +68,17 @@ const cli = yargs(hideBin(process.argv))
         return "INFO"
       })(),
     })
+
+    // Initialize telemetry if enabled via environment
+    if (Flag.OTEL_ENABLED) {
+      Telemetry.init({
+        enabled: true,
+        serviceName: Flag.OTEL_SERVICE_NAME ?? "opencode",
+        collectorEndpoint: Flag.OTEL_EXPORTER_OTLP_ENDPOINT,
+        exporterType: Flag.OTEL_EXPORTER_TYPE,
+        sampleRate: Flag.OTEL_SAMPLE_RATE ?? 1.0,
+      })
+    }
 
     process.env.AGENT = "1"
     process.env.OPENCODE = "1"
@@ -151,6 +164,9 @@ try {
   }
   process.exitCode = 1
 } finally {
+  // Shutdown telemetry to flush any pending spans
+  await Telemetry.shutdown()
+
   // Some subprocesses don't react properly to SIGTERM and similar signals.
   // Most notably, some docker-container-based MCP servers don't handle such signals unless
   // run using `docker run --init`.
