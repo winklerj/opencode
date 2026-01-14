@@ -3,7 +3,7 @@ import { Share } from "../../src/core/share"
 import { Storage } from "../../src/core/storage"
 import { Identifier } from "@opencode-ai/util/identifier"
 
-describe.concurrent("core.share", () => {
+describe("core.share", () => {
   test("should create a share", async () => {
     const sessionID = Identifier.descending()
     const share = await Share.create({ sessionID })
