@@ -159,9 +159,9 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 4.2 Chrome Extension (`packages/clients/chrome-extension/`)
 | Task | Status | Notes |
 |------|--------|-------|
-| Sidebar chat interface | pending | Chrome Sidebar API |
-| DOM/React tree extractor | pending | Component extraction |
-| Element selection overlay | pending | Visual selection |
+| Sidebar chat interface | complete | Content script, background service worker, ChromeExtensionClient |
+| DOM/React tree extractor | complete | extractFromElement, extractFromRect, detectReact with React DevTools integration |
+| Element selection overlay | complete | SelectionOverlay with hover highlight, multi-select, keyboard controls |
 | MDM distribution setup | pending | Enterprise deployment |
 
 ### 4.3 GitHub PR Client (`packages/clients/github-pr/`)
@@ -259,3 +259,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | GitHub PR Client | complete | WebhookHandler, SessionManager, ResponseFlow with Octokit integration, 32 tests |
 | 2026-01-13 | Durable Object state | complete | DurableObjectStateStore with SQL/KV modes, DurableObjectStateStoreClient, MultiplayerDurableObject base class |
 | 2026-01-13 | Slack Bot Client | complete | WebhookHandler, RepositoryClassifier, ThreadManager, BlockKit UI with 75 tests |
+| 2026-01-14 | Chrome Extension Client | complete | DOM/React tree extractor, SelectionOverlay, content script, background service worker, 48 tests |
