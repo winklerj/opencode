@@ -283,3 +283,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Fix type errors | complete | Fixed buildkite.test.ts mock fetch typing and server.ts deep type chain issue |
 | 2026-01-14 | Fix test environment issues | complete | Fixed test.concurrent (not available in Bun), added git user config to test fixture for commits |
 | 2026-01-14 | OpenTelemetry observability | complete | Telemetry, Metrics, TelemetryLog modules with SpanNames, SpanAttributes, MetricDefinitions, EventNames, OTLP export, 50 tests |
+| 2026-01-14 | Fix telemetry type errors | complete | Fixed readonly bucket arrays and test variable typing in metrics.ts and telemetry.test.ts |
