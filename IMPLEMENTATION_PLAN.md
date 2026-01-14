@@ -180,7 +180,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | PromptQueue component | complete | Queue management with drag reorder, cancel, priority display |
 | StatsDashboard component | complete | Usage metrics with live/historical data, model/agent breakdown |
 | VoiceInput component | complete | Voice-to-text with waveform, auto-submit, modal mode |
-| Mobile responsive layout | pending | PWA support |
+| Mobile responsive layout | complete | PWA manifest, service worker, mobile meta tags, install prompt |
 
 ---
 
@@ -266,3 +266,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | LaunchDarkly integration | complete | Feature flags with bool/string/number/json variations, user targeting, evaluation details |
 | 2026-01-14 | Braintrust integration | complete | Eval logging with spans, LLM call tracking, experiments, feedback, metrics helpers, 37 tests |
 | 2026-01-14 | Buildkite integration | complete | Build CRUD, annotations, agents, job management, CI helpers, Hono middleware, 47 tests |
+| 2026-01-14 | Mobile responsive layout | complete | PWA manifest with start_url/scope, service worker with offline caching, mobile meta tags (iOS/Android), PWAInstallPrompt component |

@@ -2,6 +2,7 @@
 import { render } from "solid-js/web"
 import { AppBaseProviders, AppInterface } from "@/app"
 import { Platform, PlatformProvider } from "@/context/platform"
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
 import pkg from "../package.json"
 
 const root = document.getElementById("root")
@@ -57,6 +58,7 @@ render(
     <PlatformProvider value={platform}>
       <AppBaseProviders>
         <AppInterface />
+        <PWAInstallPrompt />
       </AppBaseProviders>
     </PlatformProvider>
   ),
