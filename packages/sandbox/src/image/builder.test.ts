@@ -178,6 +178,9 @@ describe("ImageBuilder", () => {
 
       await new Promise((resolve) => builder.on("build:complete", resolve))
 
+      // Wait a small amount so job.completedAt is definitely in the past
+      await new Promise((resolve) => setTimeout(resolve, 10))
+
       // Cleanup with 0 maxAge should remove everything
       const removed = builder.cleanupJobs(0)
       expect(removed).toBe(1)
