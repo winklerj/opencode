@@ -23,6 +23,15 @@ export namespace Flag {
   export const OPENCODE_SERVER_PASSWORD = process.env["OPENCODE_SERVER_PASSWORD"]
   export const OPENCODE_SERVER_USERNAME = process.env["OPENCODE_SERVER_USERNAME"]
 
+  // Integrations
+  export const SENTRY_DSN = process.env["SENTRY_DSN"]
+  export const SENTRY_ENVIRONMENT = process.env["SENTRY_ENVIRONMENT"]
+  export const SENTRY_SAMPLE_RATE = number("SENTRY_SAMPLE_RATE")
+  export const DATADOG_API_KEY = process.env["DATADOG_API_KEY"]
+  export const DATADOG_APP_KEY = process.env["DATADOG_APP_KEY"]
+  export const DATADOG_SITE = process.env["DATADOG_SITE"]
+  export const LAUNCHDARKLY_SDK_KEY = process.env["LAUNCHDARKLY_SDK_KEY"]
+
   // Experimental
   export const OPENCODE_EXPERIMENTAL = truthy("OPENCODE_EXPERIMENTAL")
   export const OPENCODE_EXPERIMENTAL_FILEWATCHER = truthy("OPENCODE_EXPERIMENTAL_FILEWATCHER")

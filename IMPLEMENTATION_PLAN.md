@@ -189,9 +189,9 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Task | Status | Notes |
 |------|--------|-------|
 | GitHub App setup | pending | Image building without user tokens |
-| Sentry integration | pending | Error tracking |
-| Datadog integration | pending | Metrics |
-| LaunchDarkly integration | pending | Feature flags |
+| Sentry integration | complete | Error tracking with exception capture, transactions, breadcrumbs |
+| Datadog integration | complete | Metrics with increment/gauge/histogram, events, service checks |
+| LaunchDarkly integration | complete | Feature flags with user targeting, evaluation details, helpers |
 | Braintrust integration | pending | Eval logging |
 | Buildkite integration | pending | CI/CD |
 
@@ -261,3 +261,6 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Slack Bot Client | complete | WebhookHandler, RepositoryClassifier, ThreadManager, BlockKit UI with 75 tests |
 | 2026-01-14 | Chrome Extension Client | complete | DOM/React tree extractor, SelectionOverlay, content script, background service worker, 48 tests |
 | 2026-01-14 | Web Interface Extensions | complete | VSCodeEmbed, DesktopStream, PresenceAvatars, PromptQueue, StatsDashboard, VoiceInput components |
+| 2026-01-14 | Sentry integration | complete | Exception capture, transactions, breadcrumbs, Hono middleware, user context |
+| 2026-01-14 | Datadog integration | complete | Metrics (count, gauge, histogram, distribution), events, service checks, Hono middleware |
+| 2026-01-14 | LaunchDarkly integration | complete | Feature flags with bool/string/number/json variations, user targeting, evaluation details |

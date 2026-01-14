@@ -65,6 +65,7 @@ import { QuestionRoute } from "./question"
 import { Installation } from "@/installation"
 import { MDNS } from "./mdns"
 import { Worktree } from "../worktree"
+import { Sentry, Datadog, LaunchDarkly } from "../integrations"
 
 // @ts-ignore This global is needed to prevent ai-sdk from logging warnings to stdout https://github.com/vercel/ai/blob/2dc67e0ef538307f21368db32d5a12345d98831b/packages/ai/src/logger/log-warnings.ts#L85
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -93,6 +94,15 @@ export namespace Server {
           log.error("failed", {
             error: err,
           })
+
+          // Capture error in Sentry if initialized (skip 4xx errors)
+          const isClientError =
+            (err instanceof NamedError && (err instanceof Storage.NotFoundError || err instanceof Provider.ModelNotFoundError || err.name.startsWith("Worktree"))) ||
+            err instanceof HTTPException
+          if (!isClientError && Sentry.isInitialized()) {
+            Sentry.honoErrorHandler(err, c)
+          }
+
           if (err instanceof NamedError) {
             let status: ContentfulStatusCode
             if (err instanceof Storage.NotFoundError) status = 404
@@ -129,6 +139,13 @@ export namespace Server {
           if (!skipLogging) {
             timer.stop()
           }
+        })
+        .use(async (c, next) => {
+          // Datadog metrics middleware
+          if (Datadog.isInitialized()) {
+            return Datadog.honoMiddleware()(c, next)
+          }
+          return next()
         })
         .use(
           cors({
@@ -2883,6 +2900,31 @@ export namespace Server {
   export function listen(opts: { port: number; hostname: string; mdns?: boolean; cors?: string[] }) {
     _corsWhitelist = opts.cors ?? []
 
+    // Initialize integrations if configured
+    if (Flag.SENTRY_DSN) {
+      Sentry.init({
+        dsn: Flag.SENTRY_DSN,
+        environment: Flag.SENTRY_ENVIRONMENT,
+        sampleRate: Flag.SENTRY_SAMPLE_RATE,
+      })
+    }
+
+    if (Flag.DATADOG_API_KEY) {
+      Datadog.init({
+        apiKey: Flag.DATADOG_API_KEY,
+        appKey: Flag.DATADOG_APP_KEY,
+        site: Flag.DATADOG_SITE,
+      })
+    }
+
+    if (Flag.LAUNCHDARKLY_SDK_KEY) {
+      LaunchDarkly.init({
+        sdkKey: Flag.LAUNCHDARKLY_SDK_KEY,
+      }).catch((err) => {
+        log.error("Failed to initialize LaunchDarkly", { error: err })
+      })
+    }
+
     const args = {
       hostname: opts.hostname,
       idleTimeout: 0,
@@ -2916,6 +2958,15 @@ export namespace Server {
     const originalStop = server.stop.bind(server)
     server.stop = async (closeActiveConnections?: boolean) => {
       if (shouldPublishMDNS) MDNS.unpublish()
+
+      // Shutdown integrations
+      if (Datadog.isInitialized()) {
+        Datadog.shutdown()
+      }
+      if (LaunchDarkly.isInitialized()) {
+        await LaunchDarkly.shutdown()
+      }
+
       return originalStop(closeActiveConnections)
     }
 
