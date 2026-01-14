@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 
-import solidPlugin from "../node_modules/@opentui/solid/scripts/solid-plugin"
 import path from "path"
 import fs from "fs"
 import { $ } from "bun"
@@ -9,6 +8,10 @@ import { fileURLToPath } from "url"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const dir = path.resolve(__dirname, "..")
+
+// Dynamic import for solidPlugin since it's hoisted to workspace root
+const solidPluginPath = path.resolve(__dirname, "../../../node_modules/@opentui/solid/scripts/solid-plugin")
+const solidPlugin = await import(solidPluginPath).then((m) => m.default)
 
 process.chdir(dir)
 

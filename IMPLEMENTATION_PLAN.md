@@ -297,3 +297,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | SDK regeneration | complete | Regenerated SDK client types for all hosted agent APIs (Background, Sandbox, Multiplayer, Voice, Desktop, Editor, PRSession, Skills, Stats, Webhooks) |
 | 2026-01-14 | Fix enterprise tests | complete | Fixed describe.concurrent (not available in Bun) in share.test.ts; enterprise tests are integration tests requiring storage env vars |
 | 2026-01-14 | Skip enterprise tests without storage | complete | Added describe.skipIf(!hasStorage) to enterprise tests; tests now skip when OPENCODE_STORAGE_ADAPTER env var is not set |
+| 2026-01-14 | Fix build.ts solidPlugin import | complete | Fixed module resolution for @opentui/solid in monorepo; use dynamic import with absolute path from workspace root |
