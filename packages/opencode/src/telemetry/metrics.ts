@@ -61,7 +61,7 @@ interface MetricDefinition {
   type: MetricType
   description: string
   unit: string
-  buckets?: number[]
+  buckets?: readonly number[]
 }
 
 /**
@@ -228,7 +228,7 @@ interface MetricDataPoint {
   value: number
   timestamp: number
   attributes: Record<string, string | number | boolean>
-  buckets?: number[]
+  buckets?: readonly number[]
   bucketCounts?: number[]
 }
 
@@ -591,7 +591,7 @@ export namespace Metrics {
   /**
    * Compute bucket counts for a single value.
    */
-  function computeBucketCounts(value: number, buckets: number[]): number[] {
+  function computeBucketCounts(value: number, buckets: readonly number[]): number[] {
     const counts = new Array(buckets.length + 1).fill(0)
     for (let i = 0; i < buckets.length; i++) {
       if (value <= buckets[i]) {

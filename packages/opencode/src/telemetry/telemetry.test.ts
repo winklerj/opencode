@@ -145,12 +145,12 @@ describe("Telemetry", () => {
     })
 
     it("should set error status on exception", async () => {
-      let capturedSpan: ReturnType<typeof Telemetry.startSpan> = null
+      let capturedSpan: ReturnType<typeof Telemetry.startSpan> | undefined
       const error = new Error("Test error")
 
       await expect(
         Telemetry.startActiveSpan(SpanNames.PROMPT_EXECUTE, async (span) => {
-          capturedSpan = span
+          capturedSpan = span ?? undefined
           throw error
         })
       ).rejects.toThrow("Test error")
