@@ -10,12 +10,39 @@ import type {
   Auth as Auth2,
   AuthSetErrors,
   AuthSetResponses,
+  BackgroundCancelErrors,
+  BackgroundCancelResponses,
+  BackgroundEventsErrors,
+  BackgroundEventsResponses,
+  BackgroundGetErrors,
+  BackgroundGetResponses,
+  BackgroundListResponses,
+  BackgroundOutputErrors,
+  BackgroundOutputResponses,
+  BackgroundSpawnErrors,
+  BackgroundSpawnResponses,
+  BackgroundStatsResponses,
   CommandListResponses,
   Config as Config2,
   ConfigGetResponses,
   ConfigProvidersResponses,
   ConfigUpdateErrors,
   ConfigUpdateResponses,
+  DesktopGetErrors,
+  DesktopGetResponses,
+  DesktopScreenshotErrors,
+  DesktopScreenshotResponses,
+  DesktopStartErrors,
+  DesktopStartResponses,
+  DesktopStopErrors,
+  DesktopStopResponses,
+  DesktopWsErrors,
+  EditorGetErrors,
+  EditorGetResponses,
+  EditorStartErrors,
+  EditorStartResponses,
+  EditorStopErrors,
+  EditorStopResponses,
   EventSubscribeResponses,
   EventTuiCommandExecute,
   EventTuiPromptAppend,
@@ -51,6 +78,52 @@ import type {
   McpLocalConfig,
   McpRemoteConfig,
   McpStatusResponses,
+  MultiplayerAcquireLockErrors,
+  MultiplayerAcquireLockResponses,
+  MultiplayerCancelPromptErrors,
+  MultiplayerCancelPromptResponses,
+  MultiplayerClientsErrors,
+  MultiplayerClientsResponses,
+  MultiplayerCompletePromptErrors,
+  MultiplayerCompletePromptResponses,
+  MultiplayerConnectErrors,
+  MultiplayerConnectResponses,
+  MultiplayerCreateErrors,
+  MultiplayerCreateResponses,
+  MultiplayerDeleteErrors,
+  MultiplayerDeleteResponses,
+  MultiplayerDisconnectErrors,
+  MultiplayerDisconnectResponses,
+  MultiplayerExecutingPromptErrors,
+  MultiplayerExecutingPromptResponses,
+  MultiplayerGetErrors,
+  MultiplayerGetPromptErrors,
+  MultiplayerGetPromptResponses,
+  MultiplayerGetPromptsErrors,
+  MultiplayerGetPromptsResponses,
+  MultiplayerGetResponses,
+  MultiplayerJoinErrors,
+  MultiplayerJoinResponses,
+  MultiplayerLeaveErrors,
+  MultiplayerLeaveResponses,
+  MultiplayerListResponses,
+  MultiplayerQueuePromptErrors,
+  MultiplayerQueuePromptResponses,
+  MultiplayerQueueStatusErrors,
+  MultiplayerQueueStatusResponses,
+  MultiplayerReleaseLockErrors,
+  MultiplayerReleaseLockResponses,
+  MultiplayerReorderPromptErrors,
+  MultiplayerReorderPromptResponses,
+  MultiplayerStartNextPromptErrors,
+  MultiplayerStartNextPromptResponses,
+  MultiplayerUpdateCursorErrors,
+  MultiplayerUpdateCursorResponses,
+  MultiplayerUpdateStateErrors,
+  MultiplayerUpdateStateResponses,
+  MultiplayerUsersErrors,
+  MultiplayerUsersResponses,
+  MultiplayerWebsocketErrors,
   Part as Part2,
   PartDeleteErrors,
   PartDeleteResponses,
@@ -73,6 +146,17 @@ import type {
   ProviderOauthAuthorizeResponses,
   ProviderOauthCallbackErrors,
   ProviderOauthCallbackResponses,
+  PrSessionCreateErrors,
+  PrSessionCreateResponses,
+  PrSessionDeleteErrors,
+  PrSessionDeleteResponses,
+  PrSessionGetErrors,
+  PrSessionGetResponses,
+  PrSessionListCommentsErrors,
+  PrSessionListCommentsResponses,
+  PrSessionListResponses,
+  PrSessionRespondErrors,
+  PrSessionRespondResponses,
   PtyConnectErrors,
   PtyConnectResponses,
   PtyCreateErrors,
@@ -90,6 +174,35 @@ import type {
   QuestionRejectResponses,
   QuestionReplyErrors,
   QuestionReplyResponses,
+  SandboxCreateErrors,
+  SandboxCreateResponses,
+  SandboxDeleteSnapshotErrors,
+  SandboxDeleteSnapshotResponses,
+  SandboxExecErrors,
+  SandboxExecResponses,
+  SandboxGetErrors,
+  SandboxGetResponses,
+  SandboxGitStatusErrors,
+  SandboxGitStatusResponses,
+  SandboxGitSyncErrors,
+  SandboxGitSyncResponses,
+  SandboxListResponses,
+  SandboxListSnapshotsResponses,
+  SandboxLogsErrors,
+  SandboxLogsResponses,
+  SandboxPoolClaimResponses,
+  SandboxPoolStatsResponses,
+  SandboxPoolTypingResponses,
+  SandboxRestoreErrors,
+  SandboxRestoreResponses,
+  SandboxSnapshotErrors,
+  SandboxSnapshotResponses,
+  SandboxStartErrors,
+  SandboxStartResponses,
+  SandboxStopErrors,
+  SandboxStopResponses,
+  SandboxTerminateErrors,
+  SandboxTerminateResponses,
   SessionAbortErrors,
   SessionAbortResponses,
   SessionChildrenErrors,
@@ -134,6 +247,12 @@ import type {
   SessionUnshareResponses,
   SessionUpdateErrors,
   SessionUpdateResponses,
+  SkillsGetErrors,
+  SkillsGetResponses,
+  SkillsListResponses,
+  StatsGetResponses,
+  StatsHistoricalResponses,
+  StatsLiveResponses,
   SubtaskPartInput,
   TextPartInput,
   ToolIdsErrors,
@@ -158,6 +277,20 @@ import type {
   TuiShowToastResponses,
   TuiSubmitPromptResponses,
   VcsGetResponses,
+  VoiceSendErrors,
+  VoiceSendResponses,
+  VoiceStartErrors,
+  VoiceStartResponses,
+  VoiceStatusErrors,
+  VoiceStatusResponses,
+  VoiceStopErrors,
+  VoiceStopResponses,
+  WebhookGithubErrors,
+  WebhookGithubResponses,
+  WebhookSlackEventsErrors,
+  WebhookSlackEventsResponses,
+  WebhookSlackInteractionsErrors,
+  WebhookSlackInteractionsResponses,
   WorktreeCreateErrors,
   WorktreeCreateInput,
   WorktreeCreateResponses,
@@ -323,6 +456,2481 @@ export class Project extends HeyApiClient {
         ...options?.headers,
         ...params.headers,
       },
+    })
+  }
+}
+
+export class Background extends HeyApiClient {
+  /**
+   * Spawn background agent
+   *
+   * Spawn a new background coding agent for parallel work or research.
+   */
+  public spawn<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      parentSessionID?: string
+      task?: string
+      type?: "research" | "parallel-work" | "review"
+      repository?: string
+      branch?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "parentSessionID" },
+            { in: "body", key: "task" },
+            { in: "body", key: "type" },
+            { in: "body", key: "repository" },
+            { in: "body", key: "branch" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<BackgroundSpawnResponses, BackgroundSpawnErrors, ThrowOnError>({
+      url: "/background/spawn",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get agent status
+   *
+   * Get the current status and details of a background agent.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<BackgroundGetResponses, BackgroundGetErrors, ThrowOnError>({
+      url: "/background/{id}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * List agents
+   *
+   * List all background agents, optionally filtered by parent session.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      parentSessionID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "parentSessionID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<BackgroundListResponses, unknown, ThrowOnError>({
+      url: "/background",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Cancel agent
+   *
+   * Cancel a running or queued background agent.
+   */
+  public cancel<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<BackgroundCancelResponses, BackgroundCancelErrors, ThrowOnError>({
+      url: "/background/{id}/cancel",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get agent output
+   *
+   * Get the output from a completed background agent.
+   */
+  public output<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<BackgroundOutputResponses, BackgroundOutputErrors, ThrowOnError>({
+      url: "/background/{id}/output",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Stream agent events
+   *
+   * Subscribe to real-time events from a background agent using server-sent events.
+   */
+  public events<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).sse.get<BackgroundEventsResponses, BackgroundEventsErrors, ThrowOnError>({
+      url: "/background/{id}/events",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get background agent statistics
+   *
+   * Get statistics about the background agent scheduler.
+   */
+  public stats<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<BackgroundStatsResponses, unknown, ThrowOnError>({
+      url: "/background/stats",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class Multiplayer extends HeyApiClient {
+  /**
+   * List multiplayer sessions
+   *
+   * Get a list of all multiplayer sessions.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<MultiplayerListResponses, unknown, ThrowOnError>({
+      url: "/multiplayer",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create multiplayer session
+   *
+   * Create a new multiplayer session for real-time collaboration.
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      sessionID?: string
+      sandboxID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "sessionID" },
+            { in: "body", key: "sandboxID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<MultiplayerCreateResponses, MultiplayerCreateErrors, ThrowOnError>({
+      url: "/multiplayer",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Delete multiplayer session
+   *
+   * Delete a multiplayer session.
+   */
+  public delete<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<MultiplayerDeleteResponses, MultiplayerDeleteErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get multiplayer session
+   *
+   * Get details of a specific multiplayer session.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<MultiplayerGetResponses, MultiplayerGetErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Join multiplayer session
+   *
+   * Join a multiplayer session as a user.
+   */
+  public join<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+      name?: string
+      email?: string
+      avatar?: string
+      color?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+            { in: "body", key: "name" },
+            { in: "body", key: "email" },
+            { in: "body", key: "avatar" },
+            { in: "body", key: "color" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<MultiplayerJoinResponses, MultiplayerJoinErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/join",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Leave multiplayer session
+   *
+   * Leave a multiplayer session.
+   */
+  public leave<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<MultiplayerLeaveResponses, MultiplayerLeaveErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/leave",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Update cursor position
+   *
+   * Update a user's cursor position in a multiplayer session.
+   */
+  public updateCursor<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+      cursor?: {
+        file?: string
+        line?: number
+        column?: number
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+            { in: "body", key: "cursor" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).put<
+      MultiplayerUpdateCursorResponses,
+      MultiplayerUpdateCursorErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/cursor",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Release edit lock
+   *
+   * Release the edit lock for a multiplayer session.
+   */
+  public releaseLock<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<
+      MultiplayerReleaseLockResponses,
+      MultiplayerReleaseLockErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/lock",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Acquire edit lock
+   *
+   * Acquire the edit lock for a multiplayer session.
+   */
+  public acquireLock<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      MultiplayerAcquireLockResponses,
+      MultiplayerAcquireLockErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/lock",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Connect client
+   *
+   * Connect a client to a multiplayer session.
+   */
+  public connect<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+      type?: "web" | "slack" | "chrome" | "mobile" | "voice"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+            { in: "body", key: "type" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<MultiplayerConnectResponses, MultiplayerConnectErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/connect",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Disconnect client
+   *
+   * Disconnect a client from a multiplayer session.
+   */
+  public disconnect<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      clientID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "clientID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      MultiplayerDisconnectResponses,
+      MultiplayerDisconnectErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/disconnect",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get session users
+   *
+   * Get all users in a multiplayer session.
+   */
+  public users<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<MultiplayerUsersResponses, MultiplayerUsersErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/users",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get session clients
+   *
+   * Get all connected clients in a multiplayer session.
+   */
+  public clients<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<MultiplayerClientsResponses, MultiplayerClientsErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/clients",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Update session state
+   *
+   * Update the state of a multiplayer session.
+   */
+  public updateState<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      gitSyncStatus?: "pending" | "syncing" | "synced" | "error"
+      agentStatus?: "idle" | "thinking" | "executing"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "gitSyncStatus" },
+            { in: "body", key: "agentStatus" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).put<
+      MultiplayerUpdateStateResponses,
+      MultiplayerUpdateStateErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/state",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Queue prompt
+   *
+   * Add a prompt to the session queue.
+   */
+  public queuePrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID?: string
+      content?: string
+      priority?: "normal" | "high" | "urgent"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+            { in: "body", key: "content" },
+            { in: "body", key: "priority" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      MultiplayerQueuePromptResponses,
+      MultiplayerQueuePromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/prompt",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get prompt queue
+   *
+   * Get all prompts in the session queue.
+   */
+  public getPrompts<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      MultiplayerGetPromptsResponses,
+      MultiplayerGetPromptsErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/prompts",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Cancel prompt
+   *
+   * Cancel a queued prompt (users can only cancel their own prompts).
+   */
+  public cancelPrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      promptID: string
+      directory?: string
+      userID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "path", key: "promptID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<
+      MultiplayerCancelPromptResponses,
+      MultiplayerCancelPromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/prompt/{promptID}",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get prompt
+   *
+   * Get a specific prompt by ID.
+   */
+  public getPrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      promptID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "path", key: "promptID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      MultiplayerGetPromptResponses,
+      MultiplayerGetPromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/prompt/{promptID}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Reorder prompt
+   *
+   * Move a prompt to a new position in the queue (users can only reorder their own prompts).
+   */
+  public reorderPrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      promptID: string
+      directory?: string
+      userID?: string
+      newIndex?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "path", key: "promptID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "userID" },
+            { in: "body", key: "newIndex" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).put<
+      MultiplayerReorderPromptResponses,
+      MultiplayerReorderPromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/prompt/{promptID}/reorder",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get queue status
+   *
+   * Get the current status of the prompt queue.
+   */
+  public queueStatus<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      MultiplayerQueueStatusResponses,
+      MultiplayerQueueStatusErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/queue/status",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Start next prompt
+   *
+   * Start executing the next prompt in the queue.
+   */
+  public startNextPrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      MultiplayerStartNextPromptResponses,
+      MultiplayerStartNextPromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/queue/start",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Complete current prompt
+   *
+   * Mark the currently executing prompt as complete.
+   */
+  public completePrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      MultiplayerCompletePromptResponses,
+      MultiplayerCompletePromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/queue/complete",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get executing prompt
+   *
+   * Get the currently executing prompt.
+   */
+  public executingPrompt<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      MultiplayerExecutingPromptResponses,
+      MultiplayerExecutingPromptErrors,
+      ThrowOnError
+    >({
+      url: "/multiplayer/{sessionID}/queue/executing",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * WebSocket connection
+   *
+   * Establish a WebSocket connection for real-time multiplayer sync. Clients receive events for user join/leave, cursor updates, lock changes, and state changes. Clients can send cursor updates, lock requests, and ping messages.
+   */
+  public websocket<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      userID: string
+      clientType?: "web" | "slack" | "chrome" | "mobile" | "voice"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "userID" },
+            { in: "query", key: "clientType" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<unknown, MultiplayerWebsocketErrors, ThrowOnError>({
+      url: "/multiplayer/{sessionID}/ws",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class Sandbox extends HeyApiClient {
+  /**
+   * List sandboxes
+   *
+   * Get a list of all sandboxes, optionally filtered by project.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      projectID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "projectID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<SandboxListResponses, unknown, ThrowOnError>({
+      url: "/sandbox",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create sandbox
+   *
+   * Create a new sandbox for code execution.
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      projectID?: string
+      repository?: string
+      branch?: string
+      services?: Array<string>
+      resources?: {
+        cpu?: number
+        memory?: number
+        disk?: number
+      }
+      imageTag?: string
+      snapshotID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "projectID" },
+            { in: "body", key: "repository" },
+            { in: "body", key: "branch" },
+            { in: "body", key: "services" },
+            { in: "body", key: "resources" },
+            { in: "body", key: "imageTag" },
+            { in: "body", key: "snapshotID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxCreateResponses, SandboxCreateErrors, ThrowOnError>({
+      url: "/sandbox",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Get sandbox
+   *
+   * Get details of a specific sandbox.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<SandboxGetResponses, SandboxGetErrors, ThrowOnError>({
+      url: "/sandbox/{id}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Start sandbox
+   *
+   * Start a stopped or suspended sandbox.
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxStartResponses, SandboxStartErrors, ThrowOnError>({
+      url: "/sandbox/{id}/start",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Stop sandbox
+   *
+   * Stop a running sandbox (can be restarted).
+   */
+  public stop<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxStopResponses, SandboxStopErrors, ThrowOnError>({
+      url: "/sandbox/{id}/stop",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Terminate sandbox
+   *
+   * Terminate a sandbox permanently.
+   */
+  public terminate<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxTerminateResponses, SandboxTerminateErrors, ThrowOnError>({
+      url: "/sandbox/{id}/terminate",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create snapshot
+   *
+   * Create a snapshot of the sandbox for later restoration.
+   */
+  public snapshot<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+      sessionID?: string
+      gitCommit?: string
+      hasUncommittedChanges?: boolean
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "sessionID" },
+            { in: "body", key: "gitCommit" },
+            { in: "body", key: "hasUncommittedChanges" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxSnapshotResponses, SandboxSnapshotErrors, ThrowOnError>({
+      url: "/sandbox/{id}/snapshot",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Restore from snapshot
+   *
+   * Restore a sandbox from the latest snapshot for a session.
+   */
+  public restore<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      sessionID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "sessionID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxRestoreResponses, SandboxRestoreErrors, ThrowOnError>({
+      url: "/sandbox/restore",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * List snapshots
+   *
+   * Get a list of all sandbox snapshots.
+   */
+  public listSnapshots<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<SandboxListSnapshotsResponses, unknown, ThrowOnError>({
+      url: "/sandbox/snapshots",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Delete snapshot
+   *
+   * Delete a sandbox snapshot.
+   */
+  public deleteSnapshot<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<
+      SandboxDeleteSnapshotResponses,
+      SandboxDeleteSnapshotErrors,
+      ThrowOnError
+    >({
+      url: "/sandbox/snapshots/{id}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Execute command
+   *
+   * Execute a command in the sandbox.
+   */
+  public exec<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+      command?: Array<string>
+      cwd?: string
+      env?: {
+        [key: string]: string
+      }
+      timeout?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "command" },
+            { in: "body", key: "cwd" },
+            { in: "body", key: "env" },
+            { in: "body", key: "timeout" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxExecResponses, SandboxExecErrors, ThrowOnError>({
+      url: "/sandbox/{id}/exec",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Stream logs
+   *
+   * Stream logs from a service running in the sandbox.
+   */
+  public logs<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      service: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "path", key: "service" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).sse.get<SandboxLogsResponses, SandboxLogsErrors, ThrowOnError>({
+      url: "/sandbox/{id}/logs/{service}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get git status
+   *
+   * Get the git synchronization status of the sandbox.
+   */
+  public gitStatus<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<SandboxGitStatusResponses, SandboxGitStatusErrors, ThrowOnError>({
+      url: "/sandbox/{id}/git",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Force git sync
+   *
+   * Force a git synchronization in the sandbox.
+   */
+  public gitSync<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxGitSyncResponses, SandboxGitSyncErrors, ThrowOnError>({
+      url: "/sandbox/{id}/git/sync",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get warm pool stats
+   *
+   * Get statistics about the warm pool.
+   */
+  public poolStats<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<SandboxPoolStatsResponses, unknown, ThrowOnError>({
+      url: "/sandbox/pool/stats",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Claim from warm pool
+   *
+   * Claim a pre-warmed sandbox from the pool.
+   */
+  public poolClaim<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      repository?: string
+      projectID?: string
+      imageTag?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "repository" },
+            { in: "body", key: "projectID" },
+            { in: "body", key: "imageTag" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxPoolClaimResponses, unknown, ThrowOnError>({
+      url: "/sandbox/pool/claim",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Trigger warmup
+   *
+   * Trigger sandbox warmup when user starts typing.
+   */
+  public poolTyping<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      repository?: string
+      projectID?: string
+      sessionID?: string
+      partialPrompt?: string
+      imageTag?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "repository" },
+            { in: "body", key: "projectID" },
+            { in: "body", key: "sessionID" },
+            { in: "body", key: "partialPrompt" },
+            { in: "body", key: "imageTag" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<SandboxPoolTypingResponses, unknown, ThrowOnError>({
+      url: "/sandbox/pool/typing",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Skills extends HeyApiClient {
+  /**
+   * List skills
+   *
+   * List all available skills. Skills are loaded from .opencode/skills/ and .claude/skills/ directories.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<SkillsListResponses, unknown, ThrowOnError>({
+      url: "/skills",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get skill
+   *
+   * Get details for a specific skill including its content.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      name: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "name" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<SkillsGetResponses, SkillsGetErrors, ThrowOnError>({
+      url: "/skills/{name}",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class Stats extends HeyApiClient {
+  /**
+   * Get statistics
+   *
+   * Get comprehensive session statistics including token usage, costs, tool usage, and model usage.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      days?: number
+      project?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "days" },
+            { in: "query", key: "project" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<StatsGetResponses, unknown, ThrowOnError>({
+      url: "/stats",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get live metrics
+   *
+   * Get live metrics for quick dashboard display (last 24 hours).
+   */
+  public live<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<StatsLiveResponses, unknown, ThrowOnError>({
+      url: "/stats/live",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get historical metrics
+   *
+   * Get historical metrics for a specific time period.
+   */
+  public historical<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      period?: "day" | "week" | "month" | "quarter"
+      project?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "period" },
+            { in: "query", key: "project" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<StatsHistoricalResponses, unknown, ThrowOnError>({
+      url: "/stats/historical",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class Voice extends HeyApiClient {
+  /**
+   * Start voice recognition
+   *
+   * Start voice recognition for a session. Voice input will be transcribed and can be sent as prompts.
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      language?: string
+      continuous?: boolean
+      interimResults?: boolean
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "language" },
+            { in: "body", key: "continuous" },
+            { in: "body", key: "interimResults" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<VoiceStartResponses, VoiceStartErrors, ThrowOnError>({
+      url: "/session/{sessionID}/voice/start",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Stop voice recognition
+   *
+   * Stop voice recognition for a session.
+   */
+  public stop<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<VoiceStopResponses, VoiceStopErrors, ThrowOnError>({
+      url: "/session/{sessionID}/voice/stop",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get voice status
+   *
+   * Get the current voice recognition status for a session.
+   */
+  public status<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<VoiceStatusResponses, VoiceStatusErrors, ThrowOnError>({
+      url: "/session/{sessionID}/voice/status",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Send voice prompt
+   *
+   * Send voice audio data (base64 encoded) to be transcribed and optionally sent as a prompt to the session.
+   */
+  public send<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      directory?: string
+      audio?: string
+      mimeType?: string
+      confidenceThreshold?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "audio" },
+            { in: "body", key: "mimeType" },
+            { in: "body", key: "confidenceThreshold" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<VoiceSendResponses, VoiceSendErrors, ThrowOnError>({
+      url: "/session/{sessionID}/voice",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Desktop extends HeyApiClient {
+  /**
+   * Get desktop info
+   *
+   * Get the current desktop environment status and connection info for a sandbox.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<DesktopGetResponses, DesktopGetErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/desktop",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Start desktop
+   *
+   * Start the desktop environment for visual verification. This starts a VNC server in the sandbox.
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+      width?: number
+      height?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "width" },
+            { in: "body", key: "height" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<DesktopStartResponses, DesktopStartErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/desktop/start",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Stop desktop
+   *
+   * Stop the desktop environment for a sandbox.
+   */
+  public stop<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<DesktopStopResponses, DesktopStopErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/desktop/stop",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Capture screenshot
+   *
+   * Capture a screenshot of the current desktop state for visual verification.
+   */
+  public screenshot<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<DesktopScreenshotResponses, DesktopScreenshotErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/desktop/screenshot",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Desktop WebSocket
+   *
+   * WebSocket endpoint for streaming VNC desktop data. Connect to this endpoint to receive real-time desktop updates.
+   */
+  public ws<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<unknown, DesktopWsErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/desktop/ws",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class Editor extends HeyApiClient {
+  /**
+   * Get editor URL
+   *
+   * Get the URL for the web-based code editor (code-server). If autoStart is true and the editor is not running, it will be started.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+      redirect?: string
+      autoStart?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "redirect" },
+            { in: "query", key: "autoStart" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<EditorGetResponses, EditorGetErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/editor",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Start editor
+   *
+   * Start the web-based code editor (code-server) for this sandbox.
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+      type?: "code-server" | "openvscode-server"
+      port?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "type" },
+            { in: "body", key: "port" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<EditorStartResponses, EditorStartErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/editor/start",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Stop editor
+   *
+   * Stop the web-based code editor for this sandbox.
+   */
+  public stop<ThrowOnError extends boolean = false>(
+    parameters: {
+      sandboxID: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sandboxID" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<EditorStopResponses, EditorStopErrors, ThrowOnError>({
+      url: "/sandbox/{sandboxID}/editor/stop",
+      ...options,
+      ...params,
+    })
+  }
+}
+
+export class PrSession extends HeyApiClient {
+  /**
+   * List PR sessions
+   *
+   * Get a list of all active PR sessions.
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).get<PrSessionListResponses, unknown, ThrowOnError>({
+      url: "/pr-session",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create PR session
+   *
+   * Create a new session associated with a GitHub Pull Request.
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      prNumber?: number
+      repository?: string
+      sessionID?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "body", key: "prNumber" },
+            { in: "body", key: "repository" },
+            { in: "body", key: "sessionID" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PrSessionCreateResponses, PrSessionCreateErrors, ThrowOnError>({
+      url: "/pr-session",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Delete PR session
+   *
+   * Delete the session associated with a Pull Request.
+   */
+  public delete<ThrowOnError extends boolean = false>(
+    parameters: {
+      prNumber: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "prNumber" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<PrSessionDeleteResponses, PrSessionDeleteErrors, ThrowOnError>({
+      url: "/pr-session/{prNumber}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get PR session
+   *
+   * Get the session associated with a specific Pull Request.
+   */
+  public get<ThrowOnError extends boolean = false>(
+    parameters: {
+      prNumber: string
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "prNumber" },
+            { in: "query", key: "directory" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<PrSessionGetResponses, PrSessionGetErrors, ThrowOnError>({
+      url: "/pr-session/{prNumber}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * List PR comments
+   *
+   * Get all comments for a Pull Request, optionally filtered by status.
+   */
+  public listComments<ThrowOnError extends boolean = false>(
+    parameters: {
+      prNumber: string
+      directory?: string
+      status?: "pending" | "addressed" | "rejected" | "outdated"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "prNumber" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "status" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      PrSessionListCommentsResponses,
+      PrSessionListCommentsErrors,
+      ThrowOnError
+    >({
+      url: "/pr-session/{prNumber}/comments",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Respond to PR comment
+   *
+   * Post a response to a PR comment and optionally update its status.
+   */
+  public respond<ThrowOnError extends boolean = false>(
+    parameters: {
+      prNumber: string
+      directory?: string
+      commentID?: string
+      response?: string
+      status?: "pending" | "addressed" | "rejected" | "outdated"
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "prNumber" },
+            { in: "query", key: "directory" },
+            { in: "body", key: "commentID" },
+            { in: "body", key: "response" },
+            { in: "body", key: "status" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<PrSessionRespondResponses, PrSessionRespondErrors, ThrowOnError>({
+      url: "/pr-session/{prNumber}/respond",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+}
+
+export class Webhook extends HeyApiClient {
+  /**
+   * GitHub webhook
+   *
+   * Receive webhooks from GitHub for pull requests, comments, and other repository events.
+   */
+  public github<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).post<WebhookGithubResponses, WebhookGithubErrors, ThrowOnError>({
+      url: "/webhook/github",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Slack events
+   *
+   * Receive events from Slack including app mentions, messages, and reactions.
+   */
+  public slackEvents<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).post<WebhookSlackEventsResponses, WebhookSlackEventsErrors, ThrowOnError>({
+      url: "/webhook/slack/events",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Slack interactions
+   *
+   * Receive interaction payloads from Slack for button clicks, modal submissions, and shortcuts.
+   */
+  public slackInteractions<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "directory" }] }])
+    return (options?.client ?? this.client).post<
+      WebhookSlackInteractionsResponses,
+      WebhookSlackInteractionsErrors,
+      ThrowOnError
+    >({
+      url: "/webhook/slack/interactions",
+      ...options,
+      ...params,
     })
   }
 }
@@ -2985,6 +5593,26 @@ export class OpencodeClient extends HeyApiClient {
   global = new Global({ client: this.client })
 
   project = new Project({ client: this.client })
+
+  background = new Background({ client: this.client })
+
+  multiplayer = new Multiplayer({ client: this.client })
+
+  sandbox = new Sandbox({ client: this.client })
+
+  skills = new Skills({ client: this.client })
+
+  stats = new Stats({ client: this.client })
+
+  voice = new Voice({ client: this.client })
+
+  desktop = new Desktop({ client: this.client })
+
+  editor = new Editor({ client: this.client })
+
+  prSession = new PrSession({ client: this.client })
+
+  webhook = new Webhook({ client: this.client })
 
   pty = new Pty({ client: this.client })
 

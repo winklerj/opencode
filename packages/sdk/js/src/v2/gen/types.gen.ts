@@ -62,6 +62,35 @@ export type EventLspUpdated = {
   }
 }
 
+export type SessionStatus =
+  | {
+      type: "idle"
+    }
+  | {
+      type: "retry"
+      attempt: number
+      message: string
+      next: number
+    }
+  | {
+      type: "busy"
+    }
+
+export type EventSessionStatus = {
+  type: "session.status"
+  properties: {
+    sessionID: string
+    status: SessionStatus
+  }
+}
+
+export type EventSessionIdle = {
+  type: "session.idle"
+  properties: {
+    sessionID: string
+  }
+}
+
 export type FileDiff = {
   file: string
   before: string
@@ -488,35 +517,6 @@ export type EventPermissionReplied = {
   }
 }
 
-export type SessionStatus =
-  | {
-      type: "idle"
-    }
-  | {
-      type: "retry"
-      attempt: number
-      message: string
-      next: number
-    }
-  | {
-      type: "busy"
-    }
-
-export type EventSessionStatus = {
-  type: "session.status"
-  properties: {
-    sessionID: string
-    status: SessionStatus
-  }
-}
-
-export type EventSessionIdle = {
-  type: "session.idle"
-  properties: {
-    sessionID: string
-  }
-}
-
 export type QuestionOption = {
   /**
    * Display text (1-5 words, concise)
@@ -622,6 +622,29 @@ export type EventTodoUpdated = {
   properties: {
     sessionID: string
     todos: Array<Todo>
+  }
+}
+
+export type EventDesktopStarted = {
+  type: "desktop.started"
+  properties: {
+    sandboxID: string
+    vncUrl: string
+  }
+}
+
+export type EventDesktopStopped = {
+  type: "desktop.stopped"
+  properties: {
+    sandboxID: string
+  }
+}
+
+export type EventDesktopError = {
+  type: "desktop.error"
+  properties: {
+    sandboxID: string
+    error: string
   }
 }
 
@@ -787,6 +810,117 @@ export type EventVcsBranchUpdated = {
   }
 }
 
+export type EventVoiceStarted = {
+  type: "voice.started"
+  properties: {
+    sessionID: string
+  }
+}
+
+export type EventVoiceStopped = {
+  type: "voice.stopped"
+  properties: {
+    sessionID: string
+  }
+}
+
+export type EventVoiceTranscribed = {
+  type: "voice.transcribed"
+  properties: {
+    sessionID: string
+    transcript: {
+      text: string
+      isFinal: boolean
+      confidence: number
+      language?: string
+    }
+  }
+}
+
+export type EventVoiceError = {
+  type: "voice.error"
+  properties: {
+    sessionID: string
+    error: string
+  }
+}
+
+export type EventEditorStarted = {
+  type: "editor.started"
+  properties: {
+    sandboxID: string
+    url: string
+  }
+}
+
+export type EventEditorStopped = {
+  type: "editor.stopped"
+  properties: {
+    sandboxID: string
+  }
+}
+
+export type EventEditorError = {
+  type: "editor.error"
+  properties: {
+    sandboxID: string
+    error: string
+  }
+}
+
+export type EventPrSessionCreated = {
+  type: "pr-session.created"
+  properties: {
+    prNumber: number
+    sessionID: string
+    repository: string
+  }
+}
+
+export type EventPrSessionCommentAddressed = {
+  type: "pr-session.comment.addressed"
+  properties: {
+    prNumber: number
+    commentID: string
+    response: string
+  }
+}
+
+export type EventWebhookGithubReceived = {
+  type: "webhook.github.received"
+  properties: {
+    event:
+      | "pull_request"
+      | "pull_request_review"
+      | "pull_request_review_comment"
+      | "issue_comment"
+      | "push"
+      | "check_run"
+      | "check_suite"
+      | "workflow_run"
+      | "ping"
+    action?: string
+    repository?: string
+  }
+}
+
+export type EventWebhookSlackEventReceived = {
+  type: "webhook.slack.event.received"
+  properties: {
+    type: string
+    channel?: string
+    user?: string
+  }
+}
+
+export type EventWebhookSlackInteractionReceived = {
+  type: "webhook.slack.interaction.received"
+  properties: {
+    type: string
+    user?: string
+  }
+}
+
 export type Pty = {
   id: string
   title: string
@@ -847,20 +981,23 @@ export type Event =
   | EventServerInstanceDisposed
   | EventLspClientDiagnostics
   | EventLspUpdated
+  | EventSessionStatus
+  | EventSessionIdle
   | EventMessageUpdated
   | EventMessageRemoved
   | EventMessagePartUpdated
   | EventMessagePartRemoved
   | EventPermissionAsked
   | EventPermissionReplied
-  | EventSessionStatus
-  | EventSessionIdle
   | EventQuestionAsked
   | EventQuestionReplied
   | EventQuestionRejected
   | EventSessionCompacted
   | EventFileEdited
   | EventTodoUpdated
+  | EventDesktopStarted
+  | EventDesktopStopped
+  | EventDesktopError
   | EventTuiPromptAppend
   | EventTuiCommandExecute
   | EventTuiToastShow
@@ -874,6 +1011,18 @@ export type Event =
   | EventSessionError
   | EventFileWatcherUpdated
   | EventVcsBranchUpdated
+  | EventVoiceStarted
+  | EventVoiceStopped
+  | EventVoiceTranscribed
+  | EventVoiceError
+  | EventEditorStarted
+  | EventEditorStopped
+  | EventEditorError
+  | EventPrSessionCreated
+  | EventPrSessionCommentAddressed
+  | EventWebhookGithubReceived
+  | EventWebhookSlackEventReceived
+  | EventWebhookSlackInteractionReceived
   | EventPtyCreated
   | EventPtyUpdated
   | EventPtyExited
@@ -1531,6 +1680,211 @@ export type McpRemoteConfig = {
  */
 export type LayoutConfig = "auto" | "stretch"
 
+/**
+ * Hosted background agent configuration
+ */
+export type HostedConfig = {
+  /**
+   * Enable hosted background agent features
+   */
+  enabled?: boolean
+  /**
+   * Sandbox configuration for hosted agents
+   */
+  sandbox?: {
+    /**
+     * Sandbox provider
+     */
+    provider?: "modal" | "local"
+    /**
+     * Default container image for sandboxes
+     */
+    defaultImage?: string
+    /**
+     * Services to run in sandbox
+     */
+    services?: Array<string>
+    warmPool?: {
+      /**
+       * Enable warm pool
+       */
+      enabled?: boolean
+      /**
+       * Number of warm sandboxes to maintain
+       */
+      size?: number
+      /**
+       * Time-to-live for warm sandboxes in seconds
+       */
+      ttl?: number
+      /**
+       * Warm sandbox on keystroke
+       */
+      typingTrigger?: boolean
+    }
+    resources?: {
+      /**
+       * CPU cores
+       */
+      cpu?: number
+      /**
+       * Memory in MB
+       */
+      memory?: number
+      /**
+       * Disk space in GB
+       */
+      disk?: number
+    }
+    editor?: {
+      /**
+       * Enable VS Code in sandbox
+       */
+      enabled?: boolean
+      type?: "code-server" | "openvscode-server"
+      port?: number
+      /**
+       * Pre-installed extensions
+       */
+      extensions?: Array<string>
+    }
+    desktop?: {
+      /**
+       * Enable desktop streaming
+       */
+      enabled?: boolean
+      resolution?: {
+        width?: number
+        height?: number
+      }
+      vncPort?: number
+    }
+    imageBuild?: {
+      /**
+       * Rebuild interval in seconds
+       */
+      rebuildInterval?: number
+      runTestsDuringBuild?: boolean
+      /**
+       * Test timeout in ms
+       */
+      testTimeout?: number
+      cacheWarmup?: boolean
+    }
+  }
+  multiplayer?: {
+    /**
+     * Enable multiplayer sessions
+     */
+    enabled?: boolean
+    stateProvider?: "cloudflare" | "memory"
+  }
+  background?: {
+    /**
+     * Enable background agents
+     */
+    enabled?: boolean
+    /**
+     * Max concurrent sessions
+     */
+    maxConcurrent?: number
+    /**
+     * Default timeout in ms
+     */
+    defaultTimeout?: number
+  }
+  /**
+   * Skills configuration
+   */
+  skills?: {
+    /**
+     * Enable skills system
+     */
+    enabled?: boolean
+    /**
+     * Skills directory
+     */
+    directory?: string
+    /**
+     * Built-in skills to enable
+     */
+    builtIn?: Array<string>
+    custom?: Array<{
+      name: string
+      description: string
+      prompt: string
+      tools?: Array<string>
+      model?: string
+    }>
+  }
+  voice?: {
+    /**
+     * Enable voice interface
+     */
+    enabled?: boolean
+    lang?: string
+    continuous?: boolean
+    interimResults?: boolean
+    /**
+     * Delay before finalizing speech in ms
+     */
+    commitDelay?: number
+  }
+  /**
+   * Integration configurations
+   */
+  integrations?: {
+    github?: {
+      enabled: boolean
+      webhooks?: {
+        secret: string
+        events: Array<string>
+      }
+      /**
+       * GitHub App ID for image building
+       */
+      appId?: string
+      appPrivateKey?: string
+      appInstallationId?: string
+    }
+    slack?: {
+      enabled: boolean
+      botToken: string
+      signingSecret?: string
+      classifier?: {
+        model?: string
+        confidenceThreshold?: number
+        allowUnknown?: boolean
+        hints?: Array<{
+          channelPattern: string
+          repository: string
+          keywords?: Array<string>
+        }>
+      }
+    }
+    sentry?: {
+      enabled: boolean
+      dsn: string
+    }
+    datadog?: {
+      enabled: boolean
+      apiKey: string
+    }
+    launchDarkly?: {
+      enabled: boolean
+      sdkKey: string
+    }
+    braintrust?: {
+      enabled: boolean
+      apiKey: string
+    }
+    buildkite?: {
+      enabled: boolean
+      token: string
+    }
+  }
+}
+
 export type Config = {
   /**
    * JSON schema reference for configuration validation
@@ -1702,6 +2056,7 @@ export type Config = {
      */
     url?: string
   }
+  hosted?: HostedConfig
   compaction?: {
     /**
      * Enable automatic compaction when context is full (default: true)
@@ -2204,6 +2559,3205 @@ export type ProjectUpdateResponses = {
 }
 
 export type ProjectUpdateResponse = ProjectUpdateResponses[keyof ProjectUpdateResponses]
+
+export type BackgroundSpawnData = {
+  body?: {
+    /**
+     * ID of the parent session
+     */
+    parentSessionID: string
+    /**
+     * Task for the agent to accomplish
+     */
+    task: string
+    type?: "research" | "parallel-work" | "review"
+    /**
+     * Repository to work with
+     */
+    repository?: string
+    /**
+     * Branch to work on
+     */
+    branch?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/background/spawn"
+}
+
+export type BackgroundSpawnErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type BackgroundSpawnError = BackgroundSpawnErrors[keyof BackgroundSpawnErrors]
+
+export type BackgroundSpawnResponses = {
+  /**
+   * Agent spawned successfully
+   */
+  200: {
+    id: string
+    parentSessionID: string
+    sessionID: string
+    sandboxID?: string
+    status: "queued" | "initializing" | "running" | "completed" | "failed" | "cancelled"
+    task: string
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+    error?: string
+    output?: unknown
+  }
+}
+
+export type BackgroundSpawnResponse = BackgroundSpawnResponses[keyof BackgroundSpawnResponses]
+
+export type BackgroundGetData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/background/{id}"
+}
+
+export type BackgroundGetErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type BackgroundGetError = BackgroundGetErrors[keyof BackgroundGetErrors]
+
+export type BackgroundGetResponses = {
+  /**
+   * Agent information
+   */
+  200: {
+    id: string
+    parentSessionID: string
+    sessionID: string
+    sandboxID?: string
+    status: "queued" | "initializing" | "running" | "completed" | "failed" | "cancelled"
+    task: string
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+    error?: string
+    output?: unknown
+  }
+}
+
+export type BackgroundGetResponse = BackgroundGetResponses[keyof BackgroundGetResponses]
+
+export type BackgroundListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    /**
+     * Filter by parent session ID
+     */
+    parentSessionID?: string
+  }
+  url: "/background"
+}
+
+export type BackgroundListResponses = {
+  /**
+   * List of agents
+   */
+  200: {
+    agents: Array<{
+      id: string
+      parentSessionID: string
+      sessionID: string
+      sandboxID?: string
+      status: "queued" | "initializing" | "running" | "completed" | "failed" | "cancelled"
+      task: string
+      createdAt: number
+      startedAt?: number
+      completedAt?: number
+      error?: string
+      output?: unknown
+    }>
+    stats: {
+      queued: number
+      running: number
+      completed: number
+      failed: number
+    }
+  }
+}
+
+export type BackgroundListResponse = BackgroundListResponses[keyof BackgroundListResponses]
+
+export type BackgroundCancelData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/background/{id}/cancel"
+}
+
+export type BackgroundCancelErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type BackgroundCancelError = BackgroundCancelErrors[keyof BackgroundCancelErrors]
+
+export type BackgroundCancelResponses = {
+  /**
+   * Agent cancelled
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type BackgroundCancelResponse = BackgroundCancelResponses[keyof BackgroundCancelResponses]
+
+export type BackgroundOutputData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/background/{id}/output"
+}
+
+export type BackgroundOutputErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type BackgroundOutputError = BackgroundOutputErrors[keyof BackgroundOutputErrors]
+
+export type BackgroundOutputResponses = {
+  /**
+   * Agent output
+   */
+  200: {
+    id: string
+    status: "queued" | "initializing" | "running" | "completed" | "failed" | "cancelled"
+    output?: unknown
+    error?: string
+  }
+}
+
+export type BackgroundOutputResponse = BackgroundOutputResponses[keyof BackgroundOutputResponses]
+
+export type BackgroundEventsData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/background/{id}/events"
+}
+
+export type BackgroundEventsErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type BackgroundEventsError = BackgroundEventsErrors[keyof BackgroundEventsErrors]
+
+export type BackgroundEventsResponses = {
+  /**
+   * Event stream
+   */
+  200: {
+    type: "status" | "output" | "error" | "complete"
+    agent?: {
+      id: string
+      parentSessionID: string
+      sessionID: string
+      sandboxID?: string
+      status: "queued" | "initializing" | "running" | "completed" | "failed" | "cancelled"
+      task: string
+      createdAt: number
+      startedAt?: number
+      completedAt?: number
+      error?: string
+      output?: unknown
+    }
+    data?: unknown
+  }
+}
+
+export type BackgroundEventsResponse = BackgroundEventsResponses[keyof BackgroundEventsResponses]
+
+export type BackgroundStatsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/background/stats"
+}
+
+export type BackgroundStatsResponses = {
+  /**
+   * Scheduler statistics
+   */
+  200: {
+    queued: number
+    running: number
+    completed: number
+    failed: number
+  }
+}
+
+export type BackgroundStatsResponse = BackgroundStatsResponses[keyof BackgroundStatsResponses]
+
+export type MultiplayerListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer"
+}
+
+export type MultiplayerListResponses = {
+  /**
+   * List of sessions
+   */
+  200: Array<{
+    id: string
+    sessionID: string
+    sandboxID?: string
+    users: Array<{
+      id: string
+      name: string
+      email?: string
+      avatar?: string
+      color: string
+      cursor?: {
+        file?: string
+        line?: number
+        column?: number
+      }
+      joinedAt: number
+    }>
+    clients: Array<{
+      id: string
+      userID: string
+      type: "web" | "slack" | "chrome" | "mobile" | "voice"
+      connectedAt: number
+      lastActivity: number
+    }>
+    activePrompt?: {
+      id: string
+      userID: string
+      content: string
+      startedAt: number
+    }
+    promptQueue: Array<{
+      id: string
+      userID: string
+      content: string
+      queuedAt: number
+      priority: number
+    }>
+    state: {
+      gitSyncStatus: "pending" | "syncing" | "synced" | "error"
+      agentStatus: "idle" | "thinking" | "executing"
+      editLock?: string
+      version: number
+    }
+    createdAt: number
+  }>
+}
+
+export type MultiplayerListResponse = MultiplayerListResponses[keyof MultiplayerListResponses]
+
+export type MultiplayerCreateData = {
+  body?: {
+    sessionID: string
+    sandboxID?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer"
+}
+
+export type MultiplayerCreateErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type MultiplayerCreateError = MultiplayerCreateErrors[keyof MultiplayerCreateErrors]
+
+export type MultiplayerCreateResponses = {
+  /**
+   * Session created successfully
+   */
+  200: {
+    id: string
+    sessionID: string
+    sandboxID?: string
+    users: Array<{
+      id: string
+      name: string
+      email?: string
+      avatar?: string
+      color: string
+      cursor?: {
+        file?: string
+        line?: number
+        column?: number
+      }
+      joinedAt: number
+    }>
+    clients: Array<{
+      id: string
+      userID: string
+      type: "web" | "slack" | "chrome" | "mobile" | "voice"
+      connectedAt: number
+      lastActivity: number
+    }>
+    activePrompt?: {
+      id: string
+      userID: string
+      content: string
+      startedAt: number
+    }
+    promptQueue: Array<{
+      id: string
+      userID: string
+      content: string
+      queuedAt: number
+      priority: number
+    }>
+    state: {
+      gitSyncStatus: "pending" | "syncing" | "synced" | "error"
+      agentStatus: "idle" | "thinking" | "executing"
+      editLock?: string
+      version: number
+    }
+    createdAt: number
+  }
+}
+
+export type MultiplayerCreateResponse = MultiplayerCreateResponses[keyof MultiplayerCreateResponses]
+
+export type MultiplayerDeleteData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}"
+}
+
+export type MultiplayerDeleteErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerDeleteError = MultiplayerDeleteErrors[keyof MultiplayerDeleteErrors]
+
+export type MultiplayerDeleteResponses = {
+  /**
+   * Session deleted
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerDeleteResponse = MultiplayerDeleteResponses[keyof MultiplayerDeleteResponses]
+
+export type MultiplayerGetData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}"
+}
+
+export type MultiplayerGetErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerGetError = MultiplayerGetErrors[keyof MultiplayerGetErrors]
+
+export type MultiplayerGetResponses = {
+  /**
+   * Session information
+   */
+  200: {
+    id: string
+    sessionID: string
+    sandboxID?: string
+    users: Array<{
+      id: string
+      name: string
+      email?: string
+      avatar?: string
+      color: string
+      cursor?: {
+        file?: string
+        line?: number
+        column?: number
+      }
+      joinedAt: number
+    }>
+    clients: Array<{
+      id: string
+      userID: string
+      type: "web" | "slack" | "chrome" | "mobile" | "voice"
+      connectedAt: number
+      lastActivity: number
+    }>
+    activePrompt?: {
+      id: string
+      userID: string
+      content: string
+      startedAt: number
+    }
+    promptQueue: Array<{
+      id: string
+      userID: string
+      content: string
+      queuedAt: number
+      priority: number
+    }>
+    state: {
+      gitSyncStatus: "pending" | "syncing" | "synced" | "error"
+      agentStatus: "idle" | "thinking" | "executing"
+      editLock?: string
+      version: number
+    }
+    createdAt: number
+  }
+}
+
+export type MultiplayerGetResponse = MultiplayerGetResponses[keyof MultiplayerGetResponses]
+
+export type MultiplayerJoinData = {
+  body?: {
+    userID: string
+    name: string
+    email?: string
+    avatar?: string
+    color?: string
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/join"
+}
+
+export type MultiplayerJoinErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerJoinError = MultiplayerJoinErrors[keyof MultiplayerJoinErrors]
+
+export type MultiplayerJoinResponses = {
+  /**
+   * Successfully joined
+   */
+  200: {
+    id: string
+    name: string
+    email?: string
+    avatar?: string
+    color: string
+    cursor?: {
+      file?: string
+      line?: number
+      column?: number
+    }
+    joinedAt: number
+  }
+}
+
+export type MultiplayerJoinResponse = MultiplayerJoinResponses[keyof MultiplayerJoinResponses]
+
+export type MultiplayerLeaveData = {
+  body?: {
+    userID: string
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/leave"
+}
+
+export type MultiplayerLeaveErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerLeaveError = MultiplayerLeaveErrors[keyof MultiplayerLeaveErrors]
+
+export type MultiplayerLeaveResponses = {
+  /**
+   * Successfully left
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerLeaveResponse = MultiplayerLeaveResponses[keyof MultiplayerLeaveResponses]
+
+export type MultiplayerUpdateCursorData = {
+  body?: {
+    userID: string
+    cursor: {
+      file?: string
+      line?: number
+      column?: number
+    }
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/cursor"
+}
+
+export type MultiplayerUpdateCursorErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerUpdateCursorError = MultiplayerUpdateCursorErrors[keyof MultiplayerUpdateCursorErrors]
+
+export type MultiplayerUpdateCursorResponses = {
+  /**
+   * Cursor updated
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerUpdateCursorResponse = MultiplayerUpdateCursorResponses[keyof MultiplayerUpdateCursorResponses]
+
+export type MultiplayerReleaseLockData = {
+  body?: {
+    userID: string
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/lock"
+}
+
+export type MultiplayerReleaseLockErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerReleaseLockError = MultiplayerReleaseLockErrors[keyof MultiplayerReleaseLockErrors]
+
+export type MultiplayerReleaseLockResponses = {
+  /**
+   * Lock released
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerReleaseLockResponse = MultiplayerReleaseLockResponses[keyof MultiplayerReleaseLockResponses]
+
+export type MultiplayerAcquireLockData = {
+  body?: {
+    userID: string
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/lock"
+}
+
+export type MultiplayerAcquireLockErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerAcquireLockError = MultiplayerAcquireLockErrors[keyof MultiplayerAcquireLockErrors]
+
+export type MultiplayerAcquireLockResponses = {
+  /**
+   * Lock result
+   */
+  200: {
+    success: boolean
+    reason?: string
+  }
+}
+
+export type MultiplayerAcquireLockResponse = MultiplayerAcquireLockResponses[keyof MultiplayerAcquireLockResponses]
+
+export type MultiplayerConnectData = {
+  body?: {
+    userID: string
+    type: "web" | "slack" | "chrome" | "mobile" | "voice"
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/connect"
+}
+
+export type MultiplayerConnectErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerConnectError = MultiplayerConnectErrors[keyof MultiplayerConnectErrors]
+
+export type MultiplayerConnectResponses = {
+  /**
+   * Client connected
+   */
+  200: {
+    id: string
+    userID: string
+    type: "web" | "slack" | "chrome" | "mobile" | "voice"
+    connectedAt: number
+    lastActivity: number
+  }
+}
+
+export type MultiplayerConnectResponse = MultiplayerConnectResponses[keyof MultiplayerConnectResponses]
+
+export type MultiplayerDisconnectData = {
+  body?: {
+    clientID: string
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/disconnect"
+}
+
+export type MultiplayerDisconnectErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerDisconnectError = MultiplayerDisconnectErrors[keyof MultiplayerDisconnectErrors]
+
+export type MultiplayerDisconnectResponses = {
+  /**
+   * Client disconnected
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerDisconnectResponse = MultiplayerDisconnectResponses[keyof MultiplayerDisconnectResponses]
+
+export type MultiplayerUsersData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/users"
+}
+
+export type MultiplayerUsersErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerUsersError = MultiplayerUsersErrors[keyof MultiplayerUsersErrors]
+
+export type MultiplayerUsersResponses = {
+  /**
+   * List of users
+   */
+  200: Array<{
+    id: string
+    name: string
+    email?: string
+    avatar?: string
+    color: string
+    cursor?: {
+      file?: string
+      line?: number
+      column?: number
+    }
+    joinedAt: number
+  }>
+}
+
+export type MultiplayerUsersResponse = MultiplayerUsersResponses[keyof MultiplayerUsersResponses]
+
+export type MultiplayerClientsData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/clients"
+}
+
+export type MultiplayerClientsErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerClientsError = MultiplayerClientsErrors[keyof MultiplayerClientsErrors]
+
+export type MultiplayerClientsResponses = {
+  /**
+   * List of clients
+   */
+  200: Array<{
+    id: string
+    userID: string
+    type: "web" | "slack" | "chrome" | "mobile" | "voice"
+    connectedAt: number
+    lastActivity: number
+  }>
+}
+
+export type MultiplayerClientsResponse = MultiplayerClientsResponses[keyof MultiplayerClientsResponses]
+
+export type MultiplayerUpdateStateData = {
+  body?: {
+    gitSyncStatus?: "pending" | "syncing" | "synced" | "error"
+    agentStatus?: "idle" | "thinking" | "executing"
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/state"
+}
+
+export type MultiplayerUpdateStateErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerUpdateStateError = MultiplayerUpdateStateErrors[keyof MultiplayerUpdateStateErrors]
+
+export type MultiplayerUpdateStateResponses = {
+  /**
+   * State updated
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerUpdateStateResponse = MultiplayerUpdateStateResponses[keyof MultiplayerUpdateStateResponses]
+
+export type MultiplayerQueuePromptData = {
+  body?: {
+    /**
+     * ID of the user submitting the prompt
+     */
+    userID: string
+    /**
+     * The prompt content
+     */
+    content: string
+    /**
+     * Priority level (normal, high, urgent)
+     */
+    priority?: "normal" | "high" | "urgent"
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/prompt"
+}
+
+export type MultiplayerQueuePromptErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerQueuePromptError = MultiplayerQueuePromptErrors[keyof MultiplayerQueuePromptErrors]
+
+export type MultiplayerQueuePromptResponses = {
+  /**
+   * Prompt queued
+   */
+  200: {
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  }
+}
+
+export type MultiplayerQueuePromptResponse = MultiplayerQueuePromptResponses[keyof MultiplayerQueuePromptResponses]
+
+export type MultiplayerGetPromptsData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/prompts"
+}
+
+export type MultiplayerGetPromptsErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerGetPromptsError = MultiplayerGetPromptsErrors[keyof MultiplayerGetPromptsErrors]
+
+export type MultiplayerGetPromptsResponses = {
+  /**
+   * List of prompts
+   */
+  200: Array<{
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  }>
+}
+
+export type MultiplayerGetPromptsResponse = MultiplayerGetPromptsResponses[keyof MultiplayerGetPromptsResponses]
+
+export type MultiplayerCancelPromptData = {
+  body?: {
+    userID: string
+  }
+  path: {
+    sessionID: string
+    promptID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/prompt/{promptID}"
+}
+
+export type MultiplayerCancelPromptErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerCancelPromptError = MultiplayerCancelPromptErrors[keyof MultiplayerCancelPromptErrors]
+
+export type MultiplayerCancelPromptResponses = {
+  /**
+   * Prompt cancelled
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerCancelPromptResponse = MultiplayerCancelPromptResponses[keyof MultiplayerCancelPromptResponses]
+
+export type MultiplayerGetPromptData = {
+  body?: never
+  path: {
+    sessionID: string
+    promptID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/prompt/{promptID}"
+}
+
+export type MultiplayerGetPromptErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerGetPromptError = MultiplayerGetPromptErrors[keyof MultiplayerGetPromptErrors]
+
+export type MultiplayerGetPromptResponses = {
+  /**
+   * Prompt information
+   */
+  200: {
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  }
+}
+
+export type MultiplayerGetPromptResponse = MultiplayerGetPromptResponses[keyof MultiplayerGetPromptResponses]
+
+export type MultiplayerReorderPromptData = {
+  body?: {
+    userID: string
+    /**
+     * New position in the queue (0-based)
+     */
+    newIndex: number
+  }
+  path: {
+    sessionID: string
+    promptID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/prompt/{promptID}/reorder"
+}
+
+export type MultiplayerReorderPromptErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerReorderPromptError = MultiplayerReorderPromptErrors[keyof MultiplayerReorderPromptErrors]
+
+export type MultiplayerReorderPromptResponses = {
+  /**
+   * Prompt reordered
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type MultiplayerReorderPromptResponse =
+  MultiplayerReorderPromptResponses[keyof MultiplayerReorderPromptResponses]
+
+export type MultiplayerQueueStatusData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/queue/status"
+}
+
+export type MultiplayerQueueStatusErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerQueueStatusError = MultiplayerQueueStatusErrors[keyof MultiplayerQueueStatusErrors]
+
+export type MultiplayerQueueStatusResponses = {
+  /**
+   * Queue status
+   */
+  200: {
+    length: number
+    hasExecuting: boolean
+    isFull: boolean
+  }
+}
+
+export type MultiplayerQueueStatusResponse = MultiplayerQueueStatusResponses[keyof MultiplayerQueueStatusResponses]
+
+export type MultiplayerStartNextPromptData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/queue/start"
+}
+
+export type MultiplayerStartNextPromptErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerStartNextPromptError = MultiplayerStartNextPromptErrors[keyof MultiplayerStartNextPromptErrors]
+
+export type MultiplayerStartNextPromptResponses = {
+  /**
+   * Prompt started or null if none available
+   */
+  200: {
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  } | null
+}
+
+export type MultiplayerStartNextPromptResponse =
+  MultiplayerStartNextPromptResponses[keyof MultiplayerStartNextPromptResponses]
+
+export type MultiplayerCompletePromptData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/queue/complete"
+}
+
+export type MultiplayerCompletePromptErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerCompletePromptError = MultiplayerCompletePromptErrors[keyof MultiplayerCompletePromptErrors]
+
+export type MultiplayerCompletePromptResponses = {
+  /**
+   * Completed prompt or null if none executing
+   */
+  200: {
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  } | null
+}
+
+export type MultiplayerCompletePromptResponse =
+  MultiplayerCompletePromptResponses[keyof MultiplayerCompletePromptResponses]
+
+export type MultiplayerExecutingPromptData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/multiplayer/{sessionID}/queue/executing"
+}
+
+export type MultiplayerExecutingPromptErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerExecutingPromptError = MultiplayerExecutingPromptErrors[keyof MultiplayerExecutingPromptErrors]
+
+export type MultiplayerExecutingPromptResponses = {
+  /**
+   * Executing prompt or null
+   */
+  200: {
+    id: string
+    sessionID: string
+    userID: string
+    content: string
+    status: "queued" | "executing" | "completed" | "cancelled"
+    priority: "normal" | "high" | "urgent"
+    createdAt: number
+    startedAt?: number
+    completedAt?: number
+  } | null
+}
+
+export type MultiplayerExecutingPromptResponse =
+  MultiplayerExecutingPromptResponses[keyof MultiplayerExecutingPromptResponses]
+
+export type MultiplayerWebsocketData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query: {
+    directory?: string
+    /**
+     * User ID for the WebSocket connection
+     */
+    userID: string
+    /**
+     * Client type (defaults to web)
+     */
+    clientType?: "web" | "slack" | "chrome" | "mobile" | "voice"
+  }
+  url: "/multiplayer/{sessionID}/ws"
+}
+
+export type MultiplayerWebsocketErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type MultiplayerWebsocketError = MultiplayerWebsocketErrors[keyof MultiplayerWebsocketErrors]
+
+export type SandboxListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    /**
+     * Filter by project ID
+     */
+    projectID?: string
+  }
+  url: "/sandbox"
+}
+
+export type SandboxListResponses = {
+  /**
+   * List of sandboxes
+   */
+  200: Array<{
+    id: string
+    projectID: string
+    status: "initializing" | "ready" | "running" | "suspended" | "terminated"
+    provider: "modal" | "local" | "kubernetes"
+    image: {
+      id: string
+      tag: string
+      digest: string
+      builtAt: number
+    }
+    git: {
+      repo: string
+      branch: string
+      commit: string
+      syncStatus: "pending" | "syncing" | "synced" | "error"
+      syncedAt?: number
+    }
+    services: Array<{
+      name: string
+      status: "starting" | "running" | "stopped" | "error"
+      port?: number
+      url?: string
+    }>
+    network: {
+      internalIP: string
+      ports: {
+        [key: string]: number
+      }
+      publicURL?: string
+    }
+    snapshot?: {
+      id: string
+      createdAt: number
+    }
+    time: {
+      created: number
+      ready?: number
+      lastActivity: number
+    }
+  }>
+}
+
+export type SandboxListResponse = SandboxListResponses[keyof SandboxListResponses]
+
+export type SandboxCreateData = {
+  body?: {
+    projectID: string
+    repository: string
+    branch?: string
+    services?: Array<string>
+    resources?: {
+      cpu?: number
+      memory?: number
+      disk?: number
+    }
+    imageTag?: string
+    snapshotID?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox"
+}
+
+export type SandboxCreateErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type SandboxCreateError = SandboxCreateErrors[keyof SandboxCreateErrors]
+
+export type SandboxCreateResponses = {
+  /**
+   * Sandbox created successfully
+   */
+  200: {
+    id: string
+    projectID: string
+    status: "initializing" | "ready" | "running" | "suspended" | "terminated"
+    provider: "modal" | "local" | "kubernetes"
+    image: {
+      id: string
+      tag: string
+      digest: string
+      builtAt: number
+    }
+    git: {
+      repo: string
+      branch: string
+      commit: string
+      syncStatus: "pending" | "syncing" | "synced" | "error"
+      syncedAt?: number
+    }
+    services: Array<{
+      name: string
+      status: "starting" | "running" | "stopped" | "error"
+      port?: number
+      url?: string
+    }>
+    network: {
+      internalIP: string
+      ports: {
+        [key: string]: number
+      }
+      publicURL?: string
+    }
+    snapshot?: {
+      id: string
+      createdAt: number
+    }
+    time: {
+      created: number
+      ready?: number
+      lastActivity: number
+    }
+  }
+}
+
+export type SandboxCreateResponse = SandboxCreateResponses[keyof SandboxCreateResponses]
+
+export type SandboxGetData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}"
+}
+
+export type SandboxGetErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxGetError = SandboxGetErrors[keyof SandboxGetErrors]
+
+export type SandboxGetResponses = {
+  /**
+   * Sandbox information
+   */
+  200: {
+    id: string
+    projectID: string
+    status: "initializing" | "ready" | "running" | "suspended" | "terminated"
+    provider: "modal" | "local" | "kubernetes"
+    image: {
+      id: string
+      tag: string
+      digest: string
+      builtAt: number
+    }
+    git: {
+      repo: string
+      branch: string
+      commit: string
+      syncStatus: "pending" | "syncing" | "synced" | "error"
+      syncedAt?: number
+    }
+    services: Array<{
+      name: string
+      status: "starting" | "running" | "stopped" | "error"
+      port?: number
+      url?: string
+    }>
+    network: {
+      internalIP: string
+      ports: {
+        [key: string]: number
+      }
+      publicURL?: string
+    }
+    snapshot?: {
+      id: string
+      createdAt: number
+    }
+    time: {
+      created: number
+      ready?: number
+      lastActivity: number
+    }
+  }
+}
+
+export type SandboxGetResponse = SandboxGetResponses[keyof SandboxGetResponses]
+
+export type SandboxStartData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/start"
+}
+
+export type SandboxStartErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxStartError = SandboxStartErrors[keyof SandboxStartErrors]
+
+export type SandboxStartResponses = {
+  /**
+   * Sandbox started
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxStartResponse = SandboxStartResponses[keyof SandboxStartResponses]
+
+export type SandboxStopData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/stop"
+}
+
+export type SandboxStopErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxStopError = SandboxStopErrors[keyof SandboxStopErrors]
+
+export type SandboxStopResponses = {
+  /**
+   * Sandbox stopped
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxStopResponse = SandboxStopResponses[keyof SandboxStopResponses]
+
+export type SandboxTerminateData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/terminate"
+}
+
+export type SandboxTerminateErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxTerminateError = SandboxTerminateErrors[keyof SandboxTerminateErrors]
+
+export type SandboxTerminateResponses = {
+  /**
+   * Sandbox terminated
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxTerminateResponse = SandboxTerminateResponses[keyof SandboxTerminateResponses]
+
+export type SandboxSnapshotData = {
+  body?: {
+    /**
+     * Session ID that owns this sandbox
+     */
+    sessionID: string
+    /**
+     * Current git commit hash
+     */
+    gitCommit: string
+    /**
+     * Whether there are uncommitted changes
+     */
+    hasUncommittedChanges?: boolean
+  }
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/snapshot"
+}
+
+export type SandboxSnapshotErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxSnapshotError = SandboxSnapshotErrors[keyof SandboxSnapshotErrors]
+
+export type SandboxSnapshotResponses = {
+  /**
+   * Snapshot created
+   */
+  200: {
+    snapshotID: string
+    createdAt: number
+  }
+}
+
+export type SandboxSnapshotResponse = SandboxSnapshotResponses[keyof SandboxSnapshotResponses]
+
+export type SandboxRestoreData = {
+  body?: {
+    /**
+     * Session ID to restore snapshot for
+     */
+    sessionID: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/restore"
+}
+
+export type SandboxRestoreErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxRestoreError = SandboxRestoreErrors[keyof SandboxRestoreErrors]
+
+export type SandboxRestoreResponses = {
+  /**
+   * Sandbox restored
+   */
+  200: {
+    id: string
+    projectID: string
+    status: "initializing" | "ready" | "running" | "suspended" | "terminated"
+    provider: "modal" | "local" | "kubernetes"
+    image: {
+      id: string
+      tag: string
+      digest: string
+      builtAt: number
+    }
+    git: {
+      repo: string
+      branch: string
+      commit: string
+      syncStatus: "pending" | "syncing" | "synced" | "error"
+      syncedAt?: number
+    }
+    services: Array<{
+      name: string
+      status: "starting" | "running" | "stopped" | "error"
+      port?: number
+      url?: string
+    }>
+    network: {
+      internalIP: string
+      ports: {
+        [key: string]: number
+      }
+      publicURL?: string
+    }
+    snapshot?: {
+      id: string
+      createdAt: number
+    }
+    time: {
+      created: number
+      ready?: number
+      lastActivity: number
+    }
+  }
+}
+
+export type SandboxRestoreResponse = SandboxRestoreResponses[keyof SandboxRestoreResponses]
+
+export type SandboxListSnapshotsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/snapshots"
+}
+
+export type SandboxListSnapshotsResponses = {
+  /**
+   * List of snapshots
+   */
+  200: Array<{
+    id: string
+    sandboxID: string
+    expiresAt: number
+  }>
+}
+
+export type SandboxListSnapshotsResponse = SandboxListSnapshotsResponses[keyof SandboxListSnapshotsResponses]
+
+export type SandboxDeleteSnapshotData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/snapshots/{id}"
+}
+
+export type SandboxDeleteSnapshotErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxDeleteSnapshotError = SandboxDeleteSnapshotErrors[keyof SandboxDeleteSnapshotErrors]
+
+export type SandboxDeleteSnapshotResponses = {
+  /**
+   * Snapshot deleted
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxDeleteSnapshotResponse = SandboxDeleteSnapshotResponses[keyof SandboxDeleteSnapshotResponses]
+
+export type SandboxExecData = {
+  body?: {
+    /**
+     * Command and arguments
+     */
+    command: Array<string>
+    /**
+     * Working directory
+     */
+    cwd?: string
+    /**
+     * Environment variables
+     */
+    env?: {
+      [key: string]: string
+    }
+    /**
+     * Timeout in milliseconds
+     */
+    timeout?: number
+  }
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/exec"
+}
+
+export type SandboxExecErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxExecError = SandboxExecErrors[keyof SandboxExecErrors]
+
+export type SandboxExecResponses = {
+  /**
+   * Command result
+   */
+  200: {
+    exitCode: number
+    stdout: string
+    stderr: string
+    duration: number
+  }
+}
+
+export type SandboxExecResponse = SandboxExecResponses[keyof SandboxExecResponses]
+
+export type SandboxLogsData = {
+  body?: never
+  path: {
+    id: string
+    service: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/logs/{service}"
+}
+
+export type SandboxLogsErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxLogsError = SandboxLogsErrors[keyof SandboxLogsErrors]
+
+export type SandboxLogsResponses = {
+  /**
+   * Log stream
+   */
+  200: {
+    type: "log"
+    data: string
+  }
+}
+
+export type SandboxLogsResponse = SandboxLogsResponses[keyof SandboxLogsResponses]
+
+export type SandboxGitStatusData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/git"
+}
+
+export type SandboxGitStatusErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxGitStatusError = SandboxGitStatusErrors[keyof SandboxGitStatusErrors]
+
+export type SandboxGitStatusResponses = {
+  /**
+   * Git status
+   */
+  200: {
+    repo: string
+    branch: string
+    commit: string
+    syncStatus: "pending" | "syncing" | "synced" | "error"
+    syncedAt?: number
+  }
+}
+
+export type SandboxGitStatusResponse = SandboxGitStatusResponses[keyof SandboxGitStatusResponses]
+
+export type SandboxGitSyncData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{id}/git/sync"
+}
+
+export type SandboxGitSyncErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SandboxGitSyncError = SandboxGitSyncErrors[keyof SandboxGitSyncErrors]
+
+export type SandboxGitSyncResponses = {
+  /**
+   * Git sync triggered
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxGitSyncResponse = SandboxGitSyncResponses[keyof SandboxGitSyncResponses]
+
+export type SandboxPoolStatsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/pool/stats"
+}
+
+export type SandboxPoolStatsResponses = {
+  /**
+   * Pool statistics
+   */
+  200: {
+    available: number
+    total: number
+    warming: number
+  }
+}
+
+export type SandboxPoolStatsResponse = SandboxPoolStatsResponses[keyof SandboxPoolStatsResponses]
+
+export type SandboxPoolClaimData = {
+  body?: {
+    /**
+     * Repository URL to claim sandbox for
+     */
+    repository: string
+    /**
+     * Project ID to claim sandbox for
+     */
+    projectID: string
+    /**
+     * Optional specific image tag
+     */
+    imageTag?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/pool/claim"
+}
+
+export type SandboxPoolClaimResponses = {
+  /**
+   * Claimed sandbox or null if none available
+   */
+  200: {
+    id: string
+    projectID: string
+    status: "initializing" | "ready" | "running" | "suspended" | "terminated"
+    provider: "modal" | "local" | "kubernetes"
+    image: {
+      id: string
+      tag: string
+      digest: string
+      builtAt: number
+    }
+    git: {
+      repo: string
+      branch: string
+      commit: string
+      syncStatus: "pending" | "syncing" | "synced" | "error"
+      syncedAt?: number
+    }
+    services: Array<{
+      name: string
+      status: "starting" | "running" | "stopped" | "error"
+      port?: number
+      url?: string
+    }>
+    network: {
+      internalIP: string
+      ports: {
+        [key: string]: number
+      }
+      publicURL?: string
+    }
+    snapshot?: {
+      id: string
+      createdAt: number
+    }
+    time: {
+      created: number
+      ready?: number
+      lastActivity: number
+    }
+  } | null
+}
+
+export type SandboxPoolClaimResponse = SandboxPoolClaimResponses[keyof SandboxPoolClaimResponses]
+
+export type SandboxPoolTypingData = {
+  body?: {
+    /**
+     * Repository URL to warm sandbox for
+     */
+    repository: string
+    /**
+     * Project ID to warm sandbox for
+     */
+    projectID: string
+    /**
+     * Optional session ID for hook context
+     */
+    sessionID?: string
+    /**
+     * Optional partial prompt for warmup hints
+     */
+    partialPrompt?: string
+    /**
+     * Optional specific image tag
+     */
+    imageTag?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/pool/typing"
+}
+
+export type SandboxPoolTypingResponses = {
+  /**
+   * Warmup triggered
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type SandboxPoolTypingResponse = SandboxPoolTypingResponses[keyof SandboxPoolTypingResponses]
+
+export type SkillsListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/skills"
+}
+
+export type SkillsListResponses = {
+  /**
+   * List of available skills
+   */
+  200: Array<{
+    name: string
+    description: string
+    location: string
+  }>
+}
+
+export type SkillsListResponse = SkillsListResponses[keyof SkillsListResponses]
+
+export type SkillsGetData = {
+  body?: never
+  path: {
+    name: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/skills/{name}"
+}
+
+export type SkillsGetErrors = {
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type SkillsGetError = SkillsGetErrors[keyof SkillsGetErrors]
+
+export type SkillsGetResponses = {
+  /**
+   * Skill details
+   */
+  200: {
+    name: string
+    description: string
+    location: string
+    content: string
+  }
+}
+
+export type SkillsGetResponse = SkillsGetResponses[keyof SkillsGetResponses]
+
+export type StatsGetData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    /**
+     * Number of days to include (default: all time)
+     */
+    days?: number
+    /**
+     * Filter by project ID
+     */
+    project?: string
+  }
+  url: "/stats"
+}
+
+export type StatsGetResponses = {
+  /**
+   * Session statistics
+   */
+  200: {
+    totalSessions: number
+    totalMessages: number
+    totalCost: number
+    totalTokens: {
+      input: number
+      output: number
+      reasoning: number
+      cache: {
+        read: number
+        write: number
+      }
+    }
+    toolUsage: {
+      [key: string]: number
+    }
+    modelUsage: {
+      [key: string]: {
+        messages: number
+        tokens: {
+          input: number
+          output: number
+        }
+        cost: number
+      }
+    }
+    dateRange: {
+      earliest: number
+      latest: number
+    }
+    days: number
+    costPerDay: number
+    tokensPerSession: number
+    medianTokensPerSession: number
+  }
+}
+
+export type StatsGetResponse = StatsGetResponses[keyof StatsGetResponses]
+
+export type StatsLiveData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/stats/live"
+}
+
+export type StatsLiveResponses = {
+  /**
+   * Live metrics
+   */
+  200: {
+    activeSessions: number
+    totalSessions: number
+    totalMessages: number
+    recentCost: number
+  }
+}
+
+export type StatsLiveResponse = StatsLiveResponses[keyof StatsLiveResponses]
+
+export type StatsHistoricalData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    /**
+     * Time period
+     */
+    period?: "day" | "week" | "month" | "quarter"
+    /**
+     * Filter by project ID
+     */
+    project?: string
+  }
+  url: "/stats/historical"
+}
+
+export type StatsHistoricalResponses = {
+  /**
+   * Historical metrics
+   */
+  200: {
+    totalSessions: number
+    totalMessages: number
+    totalCost: number
+    totalTokens: {
+      input: number
+      output: number
+      reasoning: number
+      cache: {
+        read: number
+        write: number
+      }
+    }
+    toolUsage: {
+      [key: string]: number
+    }
+    modelUsage: {
+      [key: string]: {
+        messages: number
+        tokens: {
+          input: number
+          output: number
+        }
+        cost: number
+      }
+    }
+    dateRange: {
+      earliest: number
+      latest: number
+    }
+    days: number
+    costPerDay: number
+    tokensPerSession: number
+    medianTokensPerSession: number
+  }
+}
+
+export type StatsHistoricalResponse = StatsHistoricalResponses[keyof StatsHistoricalResponses]
+
+export type VoiceStartData = {
+  body?: {
+    /**
+     * Language code for recognition (e.g., 'en-US')
+     */
+    language?: string
+    /**
+     * Whether to use continuous recognition
+     */
+    continuous?: boolean
+    /**
+     * Whether to return interim results
+     */
+    interimResults?: boolean
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/session/{sessionID}/voice/start"
+}
+
+export type VoiceStartErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type VoiceStartError = VoiceStartErrors[keyof VoiceStartErrors]
+
+export type VoiceStartResponses = {
+  /**
+   * Voice recognition started
+   */
+  200: {
+    sessionID: string
+    status: "idle" | "listening" | "processing" | "error"
+    language?: string
+    startedAt?: number
+    lastActivityAt?: number
+    error?: string
+  }
+}
+
+export type VoiceStartResponse = VoiceStartResponses[keyof VoiceStartResponses]
+
+export type VoiceStopData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/session/{sessionID}/voice/stop"
+}
+
+export type VoiceStopErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type VoiceStopError = VoiceStopErrors[keyof VoiceStopErrors]
+
+export type VoiceStopResponses = {
+  /**
+   * Voice recognition stopped
+   */
+  200: {
+    sessionID: string
+    status: "idle" | "listening" | "processing" | "error"
+    language?: string
+    startedAt?: number
+    lastActivityAt?: number
+    error?: string
+  }
+}
+
+export type VoiceStopResponse = VoiceStopResponses[keyof VoiceStopResponses]
+
+export type VoiceStatusData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/session/{sessionID}/voice/status"
+}
+
+export type VoiceStatusErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type VoiceStatusError = VoiceStatusErrors[keyof VoiceStatusErrors]
+
+export type VoiceStatusResponses = {
+  /**
+   * Voice recognition status
+   */
+  200: {
+    sessionID: string
+    status: "idle" | "listening" | "processing" | "error"
+    language?: string
+    startedAt?: number
+    lastActivityAt?: number
+    error?: string
+  }
+}
+
+export type VoiceStatusResponse = VoiceStatusResponses[keyof VoiceStatusResponses]
+
+export type VoiceSendData = {
+  body?: {
+    /**
+     * Base64-encoded audio data
+     */
+    audio: string
+    /**
+     * MIME type of the audio (default: audio/webm)
+     */
+    mimeType?: string
+    /**
+     * Minimum confidence to auto-send (default: 0.5)
+     */
+    confidenceThreshold?: number
+  }
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/session/{sessionID}/voice"
+}
+
+export type VoiceSendErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type VoiceSendError = VoiceSendErrors[keyof VoiceSendErrors]
+
+export type VoiceSendResponses = {
+  /**
+   * Voice prompt processed
+   */
+  200: {
+    transcript: {
+      text: string
+      isFinal: boolean
+      confidence: number
+      language?: string
+    }
+    /**
+     * Whether the transcript meets criteria to be sent as a prompt
+     */
+    shouldSend: boolean
+  }
+}
+
+export type VoiceSendResponse = VoiceSendResponses[keyof VoiceSendResponses]
+
+export type DesktopGetData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/desktop"
+}
+
+export type DesktopGetErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type DesktopGetError = DesktopGetErrors[keyof DesktopGetErrors]
+
+export type DesktopGetResponses = {
+  /**
+   * Desktop information
+   */
+  200: {
+    sandboxID: string
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    vncUrl?: string
+    vncPort?: number
+    resolution?: {
+      width?: number
+      height?: number
+    }
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type DesktopGetResponse = DesktopGetResponses[keyof DesktopGetResponses]
+
+export type DesktopStartData = {
+  body?: {
+    /**
+     * Desktop width in pixels (default: 1280)
+     */
+    width?: number
+    /**
+     * Desktop height in pixels (default: 720)
+     */
+    height?: number
+  }
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/desktop/start"
+}
+
+export type DesktopStartErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type DesktopStartError = DesktopStartErrors[keyof DesktopStartErrors]
+
+export type DesktopStartResponses = {
+  /**
+   * Desktop started
+   */
+  200: {
+    sandboxID: string
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    vncUrl?: string
+    vncPort?: number
+    resolution?: {
+      width?: number
+      height?: number
+    }
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type DesktopStartResponse = DesktopStartResponses[keyof DesktopStartResponses]
+
+export type DesktopStopData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/desktop/stop"
+}
+
+export type DesktopStopErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type DesktopStopError = DesktopStopErrors[keyof DesktopStopErrors]
+
+export type DesktopStopResponses = {
+  /**
+   * Desktop stopped
+   */
+  200: {
+    sandboxID: string
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    vncUrl?: string
+    vncPort?: number
+    resolution?: {
+      width?: number
+      height?: number
+    }
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type DesktopStopResponse = DesktopStopResponses[keyof DesktopStopResponses]
+
+export type DesktopScreenshotData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/desktop/screenshot"
+}
+
+export type DesktopScreenshotErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type DesktopScreenshotError = DesktopScreenshotErrors[keyof DesktopScreenshotErrors]
+
+export type DesktopScreenshotResponses = {
+  /**
+   * Screenshot captured
+   */
+  200: {
+    sandboxID: string
+    /**
+     * Base64-encoded PNG image data
+     */
+    data: string
+    mimeType: "image/png"
+    width: number
+    height: number
+    capturedAt: number
+  }
+}
+
+export type DesktopScreenshotResponse = DesktopScreenshotResponses[keyof DesktopScreenshotResponses]
+
+export type DesktopWsData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/desktop/ws"
+}
+
+export type DesktopWsErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type DesktopWsError = DesktopWsErrors[keyof DesktopWsErrors]
+
+export type EditorGetData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+    /**
+     * If 'true', redirect to editor URL instead of returning JSON
+     */
+    redirect?: string
+    /**
+     * If 'true', automatically start editor if not running
+     */
+    autoStart?: string
+  }
+  url: "/sandbox/{sandboxID}/editor"
+}
+
+export type EditorGetErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type EditorGetError = EditorGetErrors[keyof EditorGetErrors]
+
+export type EditorGetResponses = {
+  /**
+   * Editor information
+   */
+  200: {
+    sandboxID: string
+    type: "code-server" | "openvscode-server"
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    url?: string
+    port?: number
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type EditorGetResponse = EditorGetResponses[keyof EditorGetResponses]
+
+export type EditorStartData = {
+  body?: {
+    /**
+     * Editor type (default: code-server)
+     */
+    type?: "code-server" | "openvscode-server"
+    /**
+     * Port to run on (default: 8080)
+     */
+    port?: number
+  }
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/editor/start"
+}
+
+export type EditorStartErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type EditorStartError = EditorStartErrors[keyof EditorStartErrors]
+
+export type EditorStartResponses = {
+  /**
+   * Editor started
+   */
+  200: {
+    sandboxID: string
+    type: "code-server" | "openvscode-server"
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    url?: string
+    port?: number
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type EditorStartResponse = EditorStartResponses[keyof EditorStartResponses]
+
+export type EditorStopData = {
+  body?: never
+  path: {
+    sandboxID: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/sandbox/{sandboxID}/editor/stop"
+}
+
+export type EditorStopErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type EditorStopError = EditorStopErrors[keyof EditorStopErrors]
+
+export type EditorStopResponses = {
+  /**
+   * Editor stopped
+   */
+  200: {
+    sandboxID: string
+    type: "code-server" | "openvscode-server"
+    status: "stopped" | "starting" | "running" | "stopping" | "error"
+    url?: string
+    port?: number
+    startedAt?: number
+    error?: string
+  }
+}
+
+export type EditorStopResponse = EditorStopResponses[keyof EditorStopResponses]
+
+export type PrSessionListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/pr-session"
+}
+
+export type PrSessionListResponses = {
+  /**
+   * List of PR sessions
+   */
+  200: Array<{
+    prNumber: number
+    sessionID: string
+    repository: string
+    title: string
+    author: string
+    baseBranch: string
+    headBranch: string
+    status: "open" | "closed" | "merged"
+    comments: Array<{
+      id: string
+      prNumber: number
+      author: string
+      body: string
+      path?: string
+      line?: number
+      status: "pending" | "addressed" | "rejected" | "outdated"
+      createdAt: number
+      addressedAt?: number
+      response?: string
+    }>
+    createdAt: number
+    updatedAt: number
+  }>
+}
+
+export type PrSessionListResponse = PrSessionListResponses[keyof PrSessionListResponses]
+
+export type PrSessionCreateData = {
+  body?: {
+    prNumber: number
+    /**
+     * Repository in owner/repo format
+     */
+    repository: string
+    /**
+     * Existing session ID to associate, or create new
+     */
+    sessionID?: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/pr-session"
+}
+
+export type PrSessionCreateErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type PrSessionCreateError = PrSessionCreateErrors[keyof PrSessionCreateErrors]
+
+export type PrSessionCreateResponses = {
+  /**
+   * PR session created
+   */
+  200: {
+    prNumber: number
+    sessionID: string
+    repository: string
+    title: string
+    author: string
+    baseBranch: string
+    headBranch: string
+    status: "open" | "closed" | "merged"
+    comments: Array<{
+      id: string
+      prNumber: number
+      author: string
+      body: string
+      path?: string
+      line?: number
+      status: "pending" | "addressed" | "rejected" | "outdated"
+      createdAt: number
+      addressedAt?: number
+      response?: string
+    }>
+    createdAt: number
+    updatedAt: number
+  }
+}
+
+export type PrSessionCreateResponse = PrSessionCreateResponses[keyof PrSessionCreateResponses]
+
+export type PrSessionDeleteData = {
+  body?: never
+  path: {
+    prNumber: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/pr-session/{prNumber}"
+}
+
+export type PrSessionDeleteErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PrSessionDeleteError = PrSessionDeleteErrors[keyof PrSessionDeleteErrors]
+
+export type PrSessionDeleteResponses = {
+  /**
+   * PR session deleted
+   */
+  200: {
+    success: boolean
+  }
+}
+
+export type PrSessionDeleteResponse = PrSessionDeleteResponses[keyof PrSessionDeleteResponses]
+
+export type PrSessionGetData = {
+  body?: never
+  path: {
+    prNumber: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/pr-session/{prNumber}"
+}
+
+export type PrSessionGetErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PrSessionGetError = PrSessionGetErrors[keyof PrSessionGetErrors]
+
+export type PrSessionGetResponses = {
+  /**
+   * PR session information
+   */
+  200: {
+    prNumber: number
+    sessionID: string
+    repository: string
+    title: string
+    author: string
+    baseBranch: string
+    headBranch: string
+    status: "open" | "closed" | "merged"
+    comments: Array<{
+      id: string
+      prNumber: number
+      author: string
+      body: string
+      path?: string
+      line?: number
+      status: "pending" | "addressed" | "rejected" | "outdated"
+      createdAt: number
+      addressedAt?: number
+      response?: string
+    }>
+    createdAt: number
+    updatedAt: number
+  }
+}
+
+export type PrSessionGetResponse = PrSessionGetResponses[keyof PrSessionGetResponses]
+
+export type PrSessionListCommentsData = {
+  body?: never
+  path: {
+    prNumber: string
+  }
+  query?: {
+    directory?: string
+    /**
+     * Filter by comment status
+     */
+    status?: "pending" | "addressed" | "rejected" | "outdated"
+  }
+  url: "/pr-session/{prNumber}/comments"
+}
+
+export type PrSessionListCommentsErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PrSessionListCommentsError = PrSessionListCommentsErrors[keyof PrSessionListCommentsErrors]
+
+export type PrSessionListCommentsResponses = {
+  /**
+   * List of comments
+   */
+  200: Array<{
+    id: string
+    prNumber: number
+    author: string
+    body: string
+    path?: string
+    line?: number
+    status: "pending" | "addressed" | "rejected" | "outdated"
+    createdAt: number
+    addressedAt?: number
+    response?: string
+  }>
+}
+
+export type PrSessionListCommentsResponse = PrSessionListCommentsResponses[keyof PrSessionListCommentsResponses]
+
+export type PrSessionRespondData = {
+  body?: {
+    commentID: string
+    response: string
+    status?: "pending" | "addressed" | "rejected" | "outdated"
+  }
+  path: {
+    prNumber: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/pr-session/{prNumber}/respond"
+}
+
+export type PrSessionRespondErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type PrSessionRespondError = PrSessionRespondErrors[keyof PrSessionRespondErrors]
+
+export type PrSessionRespondResponses = {
+  /**
+   * Comment updated
+   */
+  200: {
+    id: string
+    prNumber: number
+    author: string
+    body: string
+    path?: string
+    line?: number
+    status: "pending" | "addressed" | "rejected" | "outdated"
+    createdAt: number
+    addressedAt?: number
+    response?: string
+  }
+}
+
+export type PrSessionRespondResponse = PrSessionRespondResponses[keyof PrSessionRespondResponses]
+
+export type WebhookGithubData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/webhook/github"
+}
+
+export type WebhookGithubErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type WebhookGithubError = WebhookGithubErrors[keyof WebhookGithubErrors]
+
+export type WebhookGithubResponses = {
+  /**
+   * Webhook received
+   */
+  200: {
+    received: boolean
+    event:
+      | "pull_request"
+      | "pull_request_review"
+      | "pull_request_review_comment"
+      | "issue_comment"
+      | "push"
+      | "check_run"
+      | "check_suite"
+      | "workflow_run"
+      | "ping"
+    action?: string
+    repository?: string
+    handled: boolean
+  }
+}
+
+export type WebhookGithubResponse = WebhookGithubResponses[keyof WebhookGithubResponses]
+
+export type WebhookSlackEventsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/webhook/slack/events"
+}
+
+export type WebhookSlackEventsErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type WebhookSlackEventsError = WebhookSlackEventsErrors[keyof WebhookSlackEventsErrors]
+
+export type WebhookSlackEventsResponses = {
+  /**
+   * Event received
+   */
+  200:
+    | {
+        received: boolean
+        type: string
+        challenge?: string
+        handled: boolean
+      }
+    | {
+        challenge: string
+      }
+}
+
+export type WebhookSlackEventsResponse = WebhookSlackEventsResponses[keyof WebhookSlackEventsResponses]
+
+export type WebhookSlackInteractionsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+  }
+  url: "/webhook/slack/interactions"
+}
+
+export type WebhookSlackInteractionsErrors = {
+  /**
+   * Bad request
+   */
+  400: BadRequestError
+}
+
+export type WebhookSlackInteractionsError = WebhookSlackInteractionsErrors[keyof WebhookSlackInteractionsErrors]
+
+export type WebhookSlackInteractionsResponses = {
+  /**
+   * Interaction received
+   */
+  200: {
+    received: boolean
+    type: string
+    handled: boolean
+    response?: unknown
+  }
+}
+
+export type WebhookSlackInteractionsResponse =
+  WebhookSlackInteractionsResponses[keyof WebhookSlackInteractionsResponses]
 
 export type PtyListData = {
   body?: never
