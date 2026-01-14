@@ -16,3 +16,15 @@ export {
   type RegistryConfig,
   type ImageQuery,
 } from "./registry"
+
+export {
+  GitHubAppClient,
+  GitHubAppError,
+  generateJWT,
+  getInstallationToken,
+  cloneWithAppToken,
+  verifyRepositoryAccess,
+  listAccessibleRepositories,
+  type GitHubAppConfig,
+  type InstallationToken,
+} from "./github-app"

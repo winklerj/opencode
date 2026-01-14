@@ -188,7 +188,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 | Task | Status | Notes |
 |------|--------|-------|
-| GitHub App setup | pending | Image building without user tokens |
+| GitHub App setup | complete | JWT generation, installation tokens, clone with app auth, token caching, 12 tests |
 | Sentry integration | complete | Error tracking with exception capture, transactions, breadcrumbs |
 | Datadog integration | complete | Metrics with increment/gauge/histogram, events, service checks |
 | LaunchDarkly integration | complete | Feature flags with user targeting, evaluation details, helpers |
@@ -267,3 +267,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Braintrust integration | complete | Eval logging with spans, LLM call tracking, experiments, feedback, metrics helpers, 37 tests |
 | 2026-01-14 | Buildkite integration | complete | Build CRUD, annotations, agents, job management, CI helpers, Hono middleware, 47 tests |
 | 2026-01-14 | Mobile responsive layout | complete | PWA manifest with start_url/scope, service worker with offline caching, mobile meta tags (iOS/Android), PWAInstallPrompt component |
+| 2026-01-14 | GitHub App setup | complete | JWT generation, installation token fetching, GitHubAppClient with token caching, cloneWithAppToken, verifyRepositoryAccess, listAccessibleRepositories, 12 tests |

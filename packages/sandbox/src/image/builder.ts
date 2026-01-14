@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { EventEmitter } from "node:events"
+import { GitHubAppClient, type GitHubAppConfig } from "./github-app"
 
 /**
  * Configuration for the image builder
@@ -190,6 +191,7 @@ export interface ImageBuilderEvents {
  */
 export class ImageBuilder extends EventEmitter {
   private config: Required<BuilderConfig>
+  private githubClient?: GitHubAppClient
   private jobs = new Map<string, BuildJob>()
   private activeBuilds = new Set<string>()
   private buildQueue: BuildInputParsed[] = []
@@ -199,6 +201,11 @@ export class ImageBuilder extends EventEmitter {
   constructor(config: Partial<BuilderConfig> = {}) {
     super()
     this.config = BuilderConfig.parse(config) as Required<BuilderConfig>
+
+    // Initialize GitHub App client if configured
+    if (this.config.github) {
+      this.githubClient = new GitHubAppClient(this.config.github)
+    }
   }
 
   /**
@@ -379,10 +386,13 @@ export class ImageBuilder extends EventEmitter {
    * Clone repository using GitHub App token
    */
   private async cloneRepository(repository: string, branch: string): Promise<string> {
-    // In a real implementation, this would:
-    // 1. Get installation token from GitHub App
-    // 2. Clone using the token
-    // For now, return a simulated commit SHA
+    // If GitHub App is configured, use it for authenticated cloning
+    if (this.githubClient) {
+      const targetDir = `/tmp/build-${Date.now()}`
+      return await this.githubClient.clone(repository, targetDir, branch)
+    }
+
+    // Fallback: simulated clone for testing without GitHub App
     await this.simulateDelay(100)
     return `${Date.now().toString(16).slice(-8)}${Math.random().toString(16).slice(2, 10)}`
   }
