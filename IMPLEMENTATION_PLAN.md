@@ -212,6 +212,17 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 
 ---
 
+## Phase 7: Observability
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Telemetry trace definitions | complete | SpanNames, SpanAttributes, startSpan/endSpan/startActiveSpan |
+| Metric definitions | complete | Counters, histograms, gauges with OTLP export |
+| Structured log format | complete | TelemetryLog with severity levels, event names, trace context |
+| OTel SDK initialization | complete | Init/shutdown with configurable exporters (otlp, console, none) |
+
+---
+
 ## Changelog
 
 | Date | Task | Status | Notes |
@@ -271,3 +282,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | MDM distribution setup | complete | MDM policy templates (Jamf, Intune, Workspace ONE, Kandji, Mosyle, Google Admin), CRX3 packager, update manifest XML generator, update server routes, manifest.json, 45 tests |
 | 2026-01-14 | Fix type errors | complete | Fixed buildkite.test.ts mock fetch typing and server.ts deep type chain issue |
 | 2026-01-14 | Fix test environment issues | complete | Fixed test.concurrent (not available in Bun), added git user config to test fixture for commits |
+| 2026-01-14 | OpenTelemetry observability | complete | Telemetry, Metrics, TelemetryLog modules with SpanNames, SpanAttributes, MetricDefinitions, EventNames, OTLP export, 50 tests |
