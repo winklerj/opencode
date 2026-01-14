@@ -192,7 +192,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Sentry integration | complete | Error tracking with exception capture, transactions, breadcrumbs |
 | Datadog integration | complete | Metrics with increment/gauge/histogram, events, service checks |
 | LaunchDarkly integration | complete | Feature flags with user targeting, evaluation details, helpers |
-| Braintrust integration | pending | Eval logging |
+| Braintrust integration | complete | Eval logging with spans, LLM calls, experiments, feedback, metrics |
 | Buildkite integration | pending | CI/CD |
 
 ---
@@ -264,3 +264,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Sentry integration | complete | Exception capture, transactions, breadcrumbs, Hono middleware, user context |
 | 2026-01-14 | Datadog integration | complete | Metrics (count, gauge, histogram, distribution), events, service checks, Hono middleware |
 | 2026-01-14 | LaunchDarkly integration | complete | Feature flags with bool/string/number/json variations, user targeting, evaluation details |
+| 2026-01-14 | Braintrust integration | complete | Eval logging with spans, LLM call tracking, experiments, feedback, metrics helpers, 37 tests |
