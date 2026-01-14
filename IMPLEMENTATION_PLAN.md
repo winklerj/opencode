@@ -162,7 +162,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Sidebar chat interface | complete | Content script, background service worker, ChromeExtensionClient |
 | DOM/React tree extractor | complete | extractFromElement, extractFromRect, detectReact with React DevTools integration |
 | Element selection overlay | complete | SelectionOverlay with hover highlight, multi-select, keyboard controls |
-| MDM distribution setup | pending | Enterprise deployment |
+| MDM distribution setup | complete | Enterprise deployment with Jamf, Intune, Workspace ONE, Kandji, Mosyle, Google Admin policy templates; CRX3 packager; update manifest XML; update server routes |
 
 ### 4.3 GitHub PR Client (`packages/clients/github-pr/`)
 | Task | Status | Notes |
@@ -268,3 +268,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Buildkite integration | complete | Build CRUD, annotations, agents, job management, CI helpers, Hono middleware, 47 tests |
 | 2026-01-14 | Mobile responsive layout | complete | PWA manifest with start_url/scope, service worker with offline caching, mobile meta tags (iOS/Android), PWAInstallPrompt component |
 | 2026-01-14 | GitHub App setup | complete | JWT generation, installation token fetching, GitHubAppClient with token caching, cloneWithAppToken, verifyRepositoryAccess, listAccessibleRepositories, 12 tests |
+| 2026-01-14 | MDM distribution setup | complete | MDM policy templates (Jamf, Intune, Workspace ONE, Kandji, Mosyle, Google Admin), CRX3 packager, update manifest XML generator, update server routes, manifest.json, 45 tests |
