@@ -1,6 +1,7 @@
 import { Instance } from "../project/instance"
 import {
   LocalProvider,
+  ModalProvider,
   type Provider,
   Sandbox,
   WarmPoolManager,
@@ -9,6 +10,7 @@ import {
   type ClaimResult,
 } from "@opencode-ai/sandbox"
 import { Plugin } from "../plugin"
+import { Config } from "../config/config"
 
 /**
  * SandboxService provides sandbox orchestration for the project.
@@ -19,22 +21,36 @@ import { Plugin } from "../plugin"
 export namespace SandboxService {
   /**
    * Get the sandbox provider for the current project.
-   * Currently uses LocalProvider for development.
+   * Reads from hosted.sandbox.provider config to determine which provider to use.
+   * Defaults to LocalProvider for development.
    */
   export const getProvider = Instance.state(async (): Promise<Provider> => {
-    // TODO: Support configurable providers (Modal, Kubernetes)
-    const provider = new LocalProvider()
-    return provider
+    const config = await Config.get()
+    const providerType = config.hosted?.sandbox?.provider ?? "local"
+    const resources = config.hosted?.sandbox?.resources
+
+    switch (providerType) {
+      case "modal":
+        return new ModalProvider({
+          defaultCpu: resources?.cpu,
+          defaultMemory: resources?.memory,
+        })
+      case "local":
+      default:
+        return new LocalProvider()
+    }
   })
 
   /**
    * Get the warm pool manager for the current project
    */
   export const getWarmPool = Instance.state(async () => {
+    const config = await Config.get()
+    const warmPoolConfig = config.hosted?.sandbox?.warmPool
     const provider = await getProvider()
     const pool = new WarmPoolManager(provider, {
-      size: 5,
-      ttl: 1800000, // 30 minutes
+      size: warmPoolConfig?.size ?? 5,
+      ttl: (warmPoolConfig?.ttl ?? 1800) * 1000, // Convert seconds to milliseconds
     })
     return pool
   })
