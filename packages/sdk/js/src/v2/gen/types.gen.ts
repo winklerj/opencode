@@ -1771,6 +1771,49 @@ export type HostedConfig = {
       testTimeout?: number
       cacheWarmup?: boolean
     }
+    /**
+     * Security constraints for sandbox isolation
+     */
+    security?: {
+      network?: {
+        /**
+         * Allowed egress patterns
+         */
+        allowedEgress?: Array<string>
+        /**
+         * Denied egress patterns (cloud metadata endpoints)
+         */
+        denyEgress?: Array<string>
+      }
+      filesystem?: {
+        /**
+         * Paths that should be read-only
+         */
+        readOnlyPaths?: Array<string>
+        /**
+         * Paths that are writable
+         */
+        writablePaths?: Array<string>
+      }
+      limits?: {
+        /**
+         * Maximum number of processes
+         */
+        maxProcesses?: number
+        /**
+         * Maximum memory in MB
+         */
+        maxMemoryMB?: number
+        /**
+         * Maximum execution time in ms
+         */
+        maxExecutionTimeMs?: number
+        /**
+         * Maximum open files
+         */
+        maxOpenFiles?: number
+      }
+    }
   }
   multiplayer?: {
     /**
