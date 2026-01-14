@@ -32,6 +32,13 @@ export namespace Flag {
   export const DATADOG_SITE = process.env["DATADOG_SITE"]
   export const LAUNCHDARKLY_SDK_KEY = process.env["LAUNCHDARKLY_SDK_KEY"]
 
+  // OpenTelemetry
+  export const OTEL_ENABLED = truthy("OTEL_ENABLED")
+  export const OTEL_EXPORTER_TYPE = (process.env["OTEL_EXPORTER_TYPE"] as "otlp" | "console" | "none") ?? "otlp"
+  export const OTEL_EXPORTER_OTLP_ENDPOINT = process.env["OTEL_EXPORTER_OTLP_ENDPOINT"]
+  export const OTEL_SAMPLE_RATE = number("OTEL_SAMPLE_RATE")
+  export const OTEL_SERVICE_NAME = process.env["OTEL_SERVICE_NAME"]
+
   // Experimental
   export const OPENCODE_EXPERIMENTAL = truthy("OPENCODE_EXPERIMENTAL")
   export const OPENCODE_EXPERIMENTAL_FILEWATCHER = truthy("OPENCODE_EXPERIMENTAL_FILEWATCHER")
