@@ -149,12 +149,12 @@ export class ModalProvider implements Provider {
         services: input.services,
       })
 
+      const responseText = await response.text()
       if (!response.ok) {
-        const error = await response.text()
-        throw new Error(`Modal API error: ${response.status} - ${error}`)
+        throw new Error(`Modal API error: ${response.status} - ${responseText}`)
       }
 
-      const result = await response.json()
+      const result = JSON.parse(responseText)
       sandbox.modalSandboxId = result.sandbox_id
 
       // Wait for sandbox to be ready
@@ -184,11 +184,12 @@ export class ModalProvider implements Provider {
       })
 
       if (response.ok) {
-        const result = await response.json()
-        if (result.status === "running") {
+        const responseText = await response.text()
+        const result = responseText ? JSON.parse(responseText) : null
+        if (result?.status === "running") {
           return
         }
-        if (result.status === "failed") {
+        if (result?.status === "failed") {
           throw new Error(`Sandbox failed to start: ${result.error}`)
         }
       }
