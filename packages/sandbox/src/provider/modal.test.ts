@@ -99,8 +99,8 @@ describe("ModalProvider", () => {
 
   describe("list", () => {
     it("should list all sandboxes", async () => {
-      const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify({ sandbox_id: "modal-123" }), { status: 200 }),
+      const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+        (() => Promise.resolve(new Response(JSON.stringify({ sandbox_id: "modal-123" }), { status: 200 }))) as unknown as typeof fetch,
       )
 
       await provider.create({
@@ -121,8 +121,8 @@ describe("ModalProvider", () => {
     })
 
     it("should filter by projectID", async () => {
-      const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify({ sandbox_id: "modal-123" }), { status: 200 }),
+      const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
+        (() => Promise.resolve(new Response(JSON.stringify({ sandbox_id: "modal-123" }), { status: 200 }))) as unknown as typeof fetch,
       )
 
       await provider.create({

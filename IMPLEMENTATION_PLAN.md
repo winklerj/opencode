@@ -305,3 +305,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Fix modal provider response body handling | complete | Fixed response body consumption in modal.ts to read body once as text then parse JSON; added null check for result.status to handle empty response bodies |
 | 2026-01-14 | SDK v2 security types | complete | Added sandbox security types to SDK v2 types.gen.ts: NetworkSecurity, FilesystemSecurity, Limits matching config schemas |
 | 2026-01-14 | Fix SDK v2 security types | complete | Actually added the missing security types (NetworkSecurity, FilesystemSecurity, Limits, SandboxSecurity) that were documented but not present in previous commit |
+| 2026-01-14 | Fix modal provider test Response reuse | complete | Fixed tests using mockResolvedValue with same Response object; changed to mockImplementation with factory function to create fresh Response for each call |
