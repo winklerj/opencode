@@ -285,3 +285,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | OpenTelemetry observability | complete | Telemetry, Metrics, TelemetryLog modules with SpanNames, SpanAttributes, MetricDefinitions, EventNames, OTLP export, 50 tests |
 | 2026-01-14 | Fix telemetry type errors | complete | Fixed readonly bucket arrays and test variable typing in metrics.ts and telemetry.test.ts |
 | 2026-01-14 | Fix typecheck script error | complete | Excluded script/build.ts from tsconfig to avoid missing @opentui/solid module error |
+| 2026-01-14 | OpenTelemetry environment flags | complete | Added OTEL_ENABLED, OTEL_EXPORTER_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_SAMPLE_RATE, OTEL_SERVICE_NAME flags |
