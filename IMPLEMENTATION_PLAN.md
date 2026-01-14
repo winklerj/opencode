@@ -299,3 +299,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Skip enterprise tests without storage | complete | Added describe.skipIf(!hasStorage) to enterprise tests; tests now skip when OPENCODE_STORAGE_ADAPTER env var is not set |
 | 2026-01-14 | Fix build.ts solidPlugin import | complete | Fixed module resolution for @opentui/solid in monorepo; use dynamic import with absolute path from workspace root |
 | 2026-01-14 | Configurable sandbox provider | complete | SandboxService now reads hosted.sandbox.provider config; supports "modal" and "local" providers; warm pool config also reads from config with size and ttl settings |
+| 2026-01-14 | Fix symlink path traversal | complete | Added Filesystem.containsSafe that resolves symlinks via realpath before containment check; updated Instance.containsPath to use containsSafe; prevents symlinks from escaping project boundary; added 11 tests |

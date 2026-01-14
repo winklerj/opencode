@@ -26,6 +26,45 @@ export namespace Filesystem {
     return !relative(parent, child).startsWith("..")
   }
 
+  /**
+   * Check if a child path is contained within a parent path,
+   * resolving symlinks to prevent path traversal attacks.
+   *
+   * This is safer than lexical `contains` because it resolves symlinks
+   * before checking containment. If the child doesn't exist yet or
+   * realpath fails, falls back to lexical check.
+   */
+  export function containsSafe(parent: string, child: string): boolean {
+    try {
+      // Resolve parent to canonical path
+      const canonicalParent = realpathSync.native(parent)
+
+      // For the child, we need to handle the case where it doesn't exist yet
+      // Try to resolve the child, if it fails, resolve the parent of the child
+      let canonicalChild: string
+      try {
+        canonicalChild = realpathSync.native(child)
+      } catch {
+        // Child doesn't exist - resolve its parent directory and append the filename
+        const childDir = dirname(child)
+        const childName = child.slice(childDir.length + 1)
+        try {
+          const canonicalChildDir = realpathSync.native(childDir)
+          canonicalChild = join(canonicalChildDir, childName)
+        } catch {
+          // Even parent doesn't exist, fall back to lexical check
+          return contains(parent, child)
+        }
+      }
+
+      // Check containment with canonical paths
+      return !relative(canonicalParent, canonicalChild).startsWith("..")
+    } catch {
+      // If realpath fails (e.g., permission denied), fall back to lexical check
+      return contains(parent, child)
+    }
+  }
+
   export async function findUp(target: string, start: string, stop?: string) {
     let current = start
     const result = []
