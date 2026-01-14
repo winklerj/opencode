@@ -835,6 +835,43 @@ export namespace Config {
               cacheWarmup: z.boolean().default(true),
             })
             .optional(),
+          security: z
+            .object({
+              network: z
+                .object({
+                  allowedEgress: z
+                    .array(z.string())
+                    .default(["*.github.com", "*.npmjs.org", "api.anthropic.com", "registry.yarnpkg.com"])
+                    .describe("Allowed egress patterns"),
+                  denyEgress: z
+                    .array(z.string())
+                    .default(["169.254.169.254", "metadata.google.internal", "100.100.100.200"])
+                    .describe("Denied egress patterns (cloud metadata endpoints)"),
+                })
+                .optional(),
+              filesystem: z
+                .object({
+                  readOnlyPaths: z
+                    .array(z.string())
+                    .default(["/etc", "/usr", "/bin", "/sbin"])
+                    .describe("Paths that should be read-only"),
+                  writablePaths: z
+                    .array(z.string())
+                    .default(["/workspace", "/tmp", "/home"])
+                    .describe("Paths that are writable"),
+                })
+                .optional(),
+              limits: z
+                .object({
+                  maxProcesses: z.number().default(100).describe("Maximum number of processes"),
+                  maxMemoryMB: z.number().default(8192).describe("Maximum memory in MB"),
+                  maxExecutionTimeMs: z.number().default(3600000).describe("Maximum execution time in ms"),
+                  maxOpenFiles: z.number().default(1024).describe("Maximum open files"),
+                })
+                .optional(),
+            })
+            .optional()
+            .describe("Security constraints for sandbox isolation"),
         })
         .optional()
         .describe("Sandbox configuration for hosted agents"),

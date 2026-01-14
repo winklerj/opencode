@@ -122,6 +122,78 @@ export namespace Sandbox {
   export type Resources = z.infer<typeof Resources>
 
   /**
+   * Network security configuration for sandboxes.
+   * Controls which external hosts the sandbox can communicate with.
+   */
+  export const NetworkSecurity = z.object({
+    /** Allowed egress patterns (glob patterns like "*.github.com") */
+    allowedEgress: z
+      .array(z.string())
+      .default(["*.github.com", "*.npmjs.org", "api.anthropic.com", "registry.yarnpkg.com"]),
+    /** Denied egress patterns (cloud metadata endpoints, etc.) */
+    denyEgress: z
+      .array(z.string())
+      .default(["169.254.169.254", "metadata.google.internal", "100.100.100.200"]),
+  })
+  export type NetworkSecurity = z.infer<typeof NetworkSecurity>
+
+  /**
+   * Filesystem security configuration for sandboxes.
+   * Controls which paths are read-only vs writable.
+   */
+  export const FilesystemSecurity = z.object({
+    /** Paths that should be read-only */
+    readOnlyPaths: z.array(z.string()).default(["/etc", "/usr", "/bin", "/sbin"]),
+    /** Paths that are writable */
+    writablePaths: z.array(z.string()).default(["/workspace", "/tmp", "/home"]),
+  })
+  export type FilesystemSecurity = z.infer<typeof FilesystemSecurity>
+
+  /**
+   * Process and resource limits for sandbox security.
+   */
+  export const Limits = z.object({
+    /** Maximum number of processes */
+    maxProcesses: z.number().default(100),
+    /** Maximum memory in MB */
+    maxMemoryMB: z.number().default(8192),
+    /** Maximum execution time in ms */
+    maxExecutionTimeMs: z.number().default(3600000),
+    /** Maximum open files */
+    maxOpenFiles: z.number().default(1024),
+  })
+  export type Limits = z.infer<typeof Limits>
+
+  /**
+   * Complete security configuration for sandboxes.
+   * Based on SPECIFICATION.md Section 10.1.
+   */
+  export const Security = z.object({
+    network: NetworkSecurity.optional(),
+    filesystem: FilesystemSecurity.optional(),
+    limits: Limits.optional(),
+  })
+  export type Security = z.infer<typeof Security>
+
+  /** Default security configuration */
+  export const DEFAULT_SECURITY: Security = {
+    network: {
+      allowedEgress: ["*.github.com", "*.npmjs.org", "api.anthropic.com", "registry.yarnpkg.com"],
+      denyEgress: ["169.254.169.254", "metadata.google.internal", "100.100.100.200"],
+    },
+    filesystem: {
+      readOnlyPaths: ["/etc", "/usr", "/bin", "/sbin"],
+      writablePaths: ["/workspace", "/tmp", "/home"],
+    },
+    limits: {
+      maxProcesses: 100,
+      maxMemoryMB: 8192,
+      maxExecutionTimeMs: 3600000,
+      maxOpenFiles: 1024,
+    },
+  }
+
+  /**
    * Input for creating a new sandbox
    */
   export const CreateInput = z.object({
