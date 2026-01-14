@@ -1,5 +1,9 @@
-import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from "bun:test"
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test"
 import { Buildkite } from "./buildkite"
+
+// Helper to create typed mock fetch
+const mockFetch = <T extends (...args: never[]) => Promise<Response>>(fn: T) =>
+  mock(fn) as unknown as typeof fetch
 
 describe("Buildkite", () => {
   const mockConfig = {
@@ -133,7 +137,7 @@ describe("Buildkite", () => {
 
   describe("createBuild", () => {
     test("creates a build", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockBuild)
       )
 
@@ -150,7 +154,7 @@ describe("Buildkite", () => {
 
     test("uses default pipeline", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json(mockBuild)
       })
@@ -165,7 +169,7 @@ describe("Buildkite", () => {
 
     test("uses specified pipeline", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json(mockBuild)
       })
@@ -181,7 +185,7 @@ describe("Buildkite", () => {
 
     test("includes env and metadata", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockBuild)
       })
@@ -198,7 +202,7 @@ describe("Buildkite", () => {
     })
 
     test("throws on API error", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         new Response("Not Found", { status: 404 })
       )
 
@@ -224,7 +228,7 @@ describe("Buildkite", () => {
 
   describe("getBuild", () => {
     test("gets a build by number", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockBuild)
       )
 
@@ -235,7 +239,7 @@ describe("Buildkite", () => {
 
     test("uses specified pipeline", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json(mockBuild)
       })
@@ -247,7 +251,7 @@ describe("Buildkite", () => {
 
   describe("listBuilds", () => {
     test("lists builds for organization", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([mockBuild])
       )
 
@@ -258,7 +262,7 @@ describe("Buildkite", () => {
 
     test("filters by pipeline", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json([mockBuild])
       })
@@ -269,7 +273,7 @@ describe("Buildkite", () => {
 
     test("filters by branch", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json([mockBuild])
       })
@@ -280,7 +284,7 @@ describe("Buildkite", () => {
 
     test("filters by state array", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json([mockBuild])
       })
@@ -293,7 +297,7 @@ describe("Buildkite", () => {
 
     test("supports pagination", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json([mockBuild])
       })
@@ -307,7 +311,7 @@ describe("Buildkite", () => {
   describe("cancelBuild", () => {
     test("cancels a build", async () => {
       const canceledBuild = { ...mockBuild, state: "canceled" as const }
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(canceledBuild)
       )
 
@@ -317,7 +321,7 @@ describe("Buildkite", () => {
 
     test("uses correct URL", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json({ ...mockBuild, state: "canceled" })
       })
@@ -330,7 +334,7 @@ describe("Buildkite", () => {
   describe("rebuildBuild", () => {
     test("rebuilds a build", async () => {
       const newBuild = { ...mockBuild, number: 2 }
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(newBuild)
       )
 
@@ -341,7 +345,7 @@ describe("Buildkite", () => {
 
   describe("annotations", () => {
     test("creates an annotation", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockAnnotation)
       )
 
@@ -358,7 +362,7 @@ describe("Buildkite", () => {
 
     test("creates annotation with append", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockAnnotation)
       })
@@ -375,7 +379,7 @@ describe("Buildkite", () => {
     })
 
     test("lists annotations", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([mockAnnotation])
       )
 
@@ -387,7 +391,7 @@ describe("Buildkite", () => {
     test("deletes an annotation", async () => {
       let capturedUrl = ""
       let capturedMethod = ""
-      globalThis.fetch = mock(async (url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (url: string, init?: RequestInit) => {
         capturedUrl = url
         capturedMethod = init?.method ?? "GET"
         return new Response(null, { status: 204 })
@@ -401,7 +405,7 @@ describe("Buildkite", () => {
 
   describe("agents", () => {
     test("lists agents", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([mockAgent])
       )
 
@@ -411,7 +415,7 @@ describe("Buildkite", () => {
     })
 
     test("gets an agent", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockAgent)
       )
 
@@ -422,7 +426,7 @@ describe("Buildkite", () => {
 
     test("stops an agent", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return new Response(null, { status: 204 })
       })
@@ -434,7 +438,7 @@ describe("Buildkite", () => {
 
   describe("jobs", () => {
     test("gets job log", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         new Response("Test log output\nLine 2\n")
       )
 
@@ -444,7 +448,7 @@ describe("Buildkite", () => {
 
     test("retries a job", async () => {
       const newJob = { ...mockBuild.jobs[0], id: "job-456" }
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(newJob)
       )
 
@@ -454,7 +458,7 @@ describe("Buildkite", () => {
 
     test("unblocks a job", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockBuild.jobs[0])
       })
@@ -474,7 +478,7 @@ describe("Buildkite", () => {
 
   describe("waitForBuild", () => {
     test("returns immediately if build is in terminal state", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockBuild)
       )
 
@@ -484,7 +488,7 @@ describe("Buildkite", () => {
 
     test("polls until terminal state", async () => {
       let callCount = 0
-      globalThis.fetch = mock(async () => {
+      globalThis.fetch = mockFetch(async () => {
         callCount++
         if (callCount < 3) {
           return Response.json({ ...mockBuild, state: "running" })
@@ -502,7 +506,7 @@ describe("Buildkite", () => {
 
     test("calls onPoll callback", async () => {
       let polled = false
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockBuild)
       )
 
@@ -516,7 +520,7 @@ describe("Buildkite", () => {
     })
 
     test("throws on timeout", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json({ ...mockBuild, state: "running" })
       )
 
@@ -532,7 +536,7 @@ describe("Buildkite", () => {
   describe("annotateAgentResult", () => {
     test("creates success annotation", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockAnnotation)
       })
@@ -550,7 +554,7 @@ describe("Buildkite", () => {
 
     test("creates error annotation", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockAnnotation)
       })
@@ -569,7 +573,7 @@ describe("Buildkite", () => {
 
     test("includes artifacts", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockAnnotation)
       })
@@ -586,7 +590,7 @@ describe("Buildkite", () => {
 
     test("escapes HTML in content", async () => {
       let capturedBody: Record<string, unknown> = {}
-      globalThis.fetch = mock(async (_url: string, init?: RequestInit) => {
+      globalThis.fetch = mockFetch(async (_url: string, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string)
         return Response.json(mockAnnotation)
       })
@@ -603,7 +607,7 @@ describe("Buildkite", () => {
 
   describe("CI helpers", () => {
     test("triggerAndWait creates and waits", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json(mockBuild)
       )
 
@@ -617,7 +621,7 @@ describe("Buildkite", () => {
     })
 
     test("getLatestBuild returns first build", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([mockBuild])
       )
 
@@ -626,7 +630,7 @@ describe("Buildkite", () => {
     })
 
     test("getLatestBuild returns undefined for empty array", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([])
       )
 
@@ -636,7 +640,7 @@ describe("Buildkite", () => {
 
     test("getRunningBuilds filters by state", async () => {
       let capturedUrl = ""
-      globalThis.fetch = mock(async (url: string) => {
+      globalThis.fetch = mockFetch(async (url: string) => {
         capturedUrl = url
         return Response.json([{ ...mockBuild, state: "running" }])
       })
@@ -649,7 +653,7 @@ describe("Buildkite", () => {
     })
 
     test("hasPassingBuild returns true for passed build", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([mockBuild])
       )
 
@@ -658,7 +662,7 @@ describe("Buildkite", () => {
     })
 
     test("hasPassingBuild returns false for no builds", async () => {
-      globalThis.fetch = mock(async () =>
+      globalThis.fetch = mockFetch(async () =>
         Response.json([])
       )
 
