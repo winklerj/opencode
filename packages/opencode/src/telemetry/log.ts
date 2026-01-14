@@ -74,8 +74,22 @@ export const SeverityText: Record<Severity, string> = {
 
 /**
  * Event domain categories.
+ * See SPECIFICATION.md section 12.5 for the complete list.
  */
-export type EventDomain = "sandbox" | "prompt" | "client" | "integration" | "system" | "multiplayer" | "skill"
+export type EventDomain =
+  | "sandbox"
+  | "prompt"
+  | "client"
+  | "integration"
+  | "system"
+  | "multiplayer"
+  | "skill"
+  | "background"
+  | "voice"
+  | "desktop"
+  | "editor"
+  | "stats"
+  | "warmpool"
 
 /**
  * Base log record attributes following OTel semantic conventions.
@@ -134,20 +148,25 @@ export interface TelemetryLogConfig {
 
 /**
  * Well-known event names for the hosted agent system.
+ * See SPECIFICATION.md section 11 for the complete event catalog.
  */
 export const EventNames = {
   // Sandbox events
   SANDBOX_CREATED: "sandbox.created",
+  SANDBOX_UPDATED: "sandbox.updated",
   SANDBOX_READY: "sandbox.ready",
   SANDBOX_GIT_SYNC_STARTED: "sandbox.git.sync.started",
   SANDBOX_GIT_SYNC_COMPLETED: "sandbox.git.sync.completed",
   SANDBOX_GIT_SYNC_FAILED: "sandbox.git.sync.failed",
   SANDBOX_SNAPSHOT_CREATED: "sandbox.snapshot.created",
   SANDBOX_SNAPSHOT_RESTORED: "sandbox.snapshot.restored",
+  SANDBOX_SERVICE_READY: "sandbox.service.ready",
   SANDBOX_TERMINATED: "sandbox.terminated",
 
   // Warm pool events
   WARMPOOL_SANDBOX_CLAIMED: "warmpool.sandbox.claimed",
+  WARMPOOL_SANDBOX_RETURNED: "warmpool.sandbox.returned",
+  WARMPOOL_TYPING_DETECTED: "warmpool.typing.detected",
   WARMPOOL_REPLENISHED: "warmpool.replenished",
 
   // Prompt events
@@ -169,14 +188,48 @@ export const EventNames = {
   // Multiplayer events
   MULTIPLAYER_USER_JOINED: "multiplayer.user.joined",
   MULTIPLAYER_USER_LEFT: "multiplayer.user.left",
+  MULTIPLAYER_CURSOR_MOVED: "multiplayer.cursor.moved",
+  MULTIPLAYER_PROMPT_QUEUED: "multiplayer.prompt.queued",
+  MULTIPLAYER_STATE_CHANGED: "multiplayer.state.changed",
+
+  // Background agent events
+  BACKGROUND_SPAWNED: "background.spawned",
+  BACKGROUND_STATUS: "background.status",
+  BACKGROUND_COMPLETED: "background.completed",
 
   // Integration events
+  INTEGRATION_GITHUB_WEBHOOK: "integration.github.webhook",
+  INTEGRATION_SLACK_MESSAGE: "integration.slack.message",
   SLACK_MESSAGE_RECEIVED: "slack.message.received",
   SLACK_RESPONSE_SENT: "slack.response.sent",
   GITHUB_WEBHOOK_RECEIVED: "github.webhook.received",
   GITHUB_PR_CREATED: "github.pr.created",
   PR_COMMENT_RECEIVED: "pr.comment.received",
   PR_COMMENT_RESPONDED: "pr.comment.responded",
+  PR_SESSION_CREATED: "pr.session.created",
+  PR_CHANGES_PUSHED: "pr.changes.pushed",
+
+  // Voice events
+  VOICE_STARTED: "voice.started",
+  VOICE_TRANSCRIPT_INTERIM: "voice.transcript.interim",
+  VOICE_TRANSCRIPT_FINAL: "voice.transcript.final",
+  VOICE_STOPPED: "voice.stopped",
+
+  // Desktop streaming events
+  DESKTOP_STARTED: "desktop.started",
+  DESKTOP_STOPPED: "desktop.stopped",
+  DESKTOP_SCREENSHOT_CAPTURED: "desktop.screenshot.captured",
+
+  // Editor events
+  EDITOR_OPENED: "editor.opened",
+  EDITOR_FILE_SAVED: "editor.file.saved",
+  EDITOR_CLOSED: "editor.closed",
+
+  // Statistics events
+  STATS_PROMPT_SENT: "stats.prompt.sent",
+  STATS_SESSION_CREATED: "stats.session.created",
+  STATS_PR_CREATED: "stats.pr.created",
+  STATS_PR_MERGED: "stats.pr.merged",
 
   // System events
   IMAGE_BUILD_STARTED: "image.build.started",

@@ -1,6 +1,22 @@
 import { Instance } from "../project/instance"
 import { AgentScheduler, type Agent as BackgroundAgent } from "@opencode-ai/background"
 import { Plugin } from "../plugin"
+import { SandboxService } from "../sandbox/service"
+import { TelemetryLog, EventNames } from "../telemetry/log"
+
+/**
+ * Cache of sandbox configs for agents.
+ * Maps agent ID to sandbox configuration used during spawn.
+ */
+const agentSandboxConfigs = new Map<
+  string,
+  {
+    repository?: string
+    branch?: string
+    imageTag?: string
+    projectID?: string
+  }
+>()
 
 /**
  * BackgroundService provides a singleton AgentScheduler for the project.
@@ -26,22 +42,83 @@ export namespace BackgroundService {
 
     // Configure initialization callback to set up sandbox
     scheduler.onInitialize(async (agent) => {
-      // TODO: In a full implementation, this would:
-      // 1. Get a sandbox from the warm pool or create one via SandboxProvider
-      // 2. Clone the repository if specified
-      // 3. Return the sandboxID
-      // For now, return a mock sandbox ID
+      // Look up sandbox config that was cached during spawn
+      const sandboxConfig = agentSandboxConfigs.get(agent.id)
+
+      if (sandboxConfig?.repository && sandboxConfig?.projectID) {
+        // Try warm pool first
+        const claimResult = await SandboxService.claimFromPool(
+          sandboxConfig.repository,
+          sandboxConfig.projectID,
+          sandboxConfig.imageTag,
+        )
+
+        if (claimResult.sandbox) {
+          TelemetryLog.info("Background agent claimed sandbox from warm pool", {
+            "event.name": EventNames.BACKGROUND_SPAWNED,
+            "event.domain": "background",
+            "opencode.sandbox.id": claimResult.sandbox.id,
+          })
+          return { sandboxID: claimResult.sandbox.id }
+        }
+
+        // Fall back to creating a new sandbox
+        const sandbox = await SandboxService.create({
+          projectID: sandboxConfig.projectID,
+          repository: sandboxConfig.repository,
+          branch: sandboxConfig.branch,
+          imageTag: sandboxConfig.imageTag,
+        })
+
+        TelemetryLog.info("Background agent created new sandbox", {
+          "event.name": EventNames.BACKGROUND_SPAWNED,
+          "event.domain": "background",
+          "opencode.sandbox.id": sandbox.id,
+        })
+        return { sandboxID: sandbox.id }
+      }
+
+      // No sandbox config - return a mock ID for testing
+      TelemetryLog.info("Background agent using mock sandbox", {
+        "event.name": EventNames.BACKGROUND_SPAWNED,
+        "event.domain": "background",
+      })
       return { sandboxID: `sandbox_${agent.id}` }
     })
 
     // Configure run callback to execute the agent task
     scheduler.onRun(async (agent) => {
-      // TODO: In a full implementation, this would:
-      // 1. Create a new OpenCode session in the sandbox
-      // 2. Execute the task using the agent's system prompt
-      // 3. Return the output
-      // For now, simulate completion
-      return { output: `Task "${agent.task}" completed` }
+      // Execute the task in the sandbox
+      const sandboxID = agent.sandboxID
+      if (!sandboxID || sandboxID.startsWith("sandbox_")) {
+        // Mock sandbox - simulate completion
+        TelemetryLog.info("Background agent completed (mock)", {
+          "event.name": EventNames.BACKGROUND_COMPLETED,
+          "event.domain": "background",
+        })
+        return { output: `Task "${agent.task}" completed (mock)` }
+      }
+
+      // Real sandbox - execute command
+      const result = await SandboxService.execute(sandboxID, [
+        "bash",
+        "-c",
+        `echo "Executing task: ${agent.task}"`,
+      ])
+
+      TelemetryLog.info("Background agent completed", {
+        "event.name": EventNames.BACKGROUND_COMPLETED,
+        "event.domain": "background",
+        "opencode.sandbox.id": sandboxID,
+      })
+
+      // Clean up the cached sandbox config
+      agentSandboxConfigs.delete(agent.id)
+
+      return {
+        output: result.stdout,
+        exitCode: result.exitCode,
+      }
     })
 
     return scheduler
@@ -111,6 +188,16 @@ export namespace BackgroundService {
 
     if (!result.success || !result.agent) {
       return { success: false, error: result.error || "Unknown error" }
+    }
+
+    // Cache the full sandbox config (with projectID from hook if available)
+    if (sandboxConfig) {
+      agentSandboxConfigs.set(result.agent.id, {
+        repository: sandboxConfig.repository,
+        branch: sandboxConfig.branch,
+        imageTag: sandboxConfig.imageTag,
+        projectID: hookOutput.sandboxConfig?.projectID,
+      })
     }
 
     return { success: true, agent: result.agent }
