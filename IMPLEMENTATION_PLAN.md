@@ -295,3 +295,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | SnapshotLifecycle orchestration | complete | Added SnapshotLifecycle module (packages/opencode/src/snapshot/lifecycle.ts) for session continuity; implements onAgentComplete (auto-snapshot), onFollowUpPrompt (restore or cold start), cleanupExpiredSnapshots; listens to session.idle events; includes 4 tests |
 | 2026-01-14 | Implementation verification | complete | Verified all tasks complete: typecheck passes (19 packages), 790 tests pass, all specification features implemented across 7 phases |
 | 2026-01-14 | SDK regeneration | complete | Regenerated SDK client types for all hosted agent APIs (Background, Sandbox, Multiplayer, Voice, Desktop, Editor, PRSession, Skills, Stats, Webhooks) |
+| 2026-01-14 | Fix enterprise tests | complete | Fixed describe.concurrent (not available in Bun) in share.test.ts; enterprise tests are integration tests requiring storage env vars |
