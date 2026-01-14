@@ -219,11 +219,67 @@ export namespace SandboxService {
   }
 
   /**
-   * Trigger warmup on typing
+   * Trigger warmup on typing.
+   * This also triggers the prompt.typing hook to allow plugins to provide warmup hints.
    */
-  export async function onTyping(repository: string, projectID: string, imageTag?: string): Promise<void> {
+  export async function onTyping(
+    repository: string,
+    projectID: string,
+    sessionID: string,
+    partialPrompt: string = "",
+    imageTag?: string,
+  ): Promise<void> {
+    // Trigger the prompt.typing hook to allow plugins to provide warmup hints
+    const hookOutput = await Plugin.trigger(
+      "prompt.typing",
+      {
+        sessionID,
+        partialPrompt,
+        keystrokeTimestamp: Date.now(),
+      },
+      {
+        warmupHints: {
+          services: [],
+          estimatedRepo: repository,
+        },
+      },
+    )
+
+    // Use warmup hints from hook if provided
+    const estimatedRepo = hookOutput.warmupHints?.estimatedRepo ?? repository
+
     const pool = await getWarmPool()
-    return pool.onTyping(repository, projectID, imageTag)
+    return pool.onTyping(estimatedRepo, projectID, imageTag)
+  }
+
+  /**
+   * Check if a file edit operation is allowed based on git sync status.
+   * This triggers the sandbox.edit.before hook.
+   *
+   * @returns Object with allowed flag and optional reason if blocked
+   */
+  export async function checkEditAllowed(
+    sandboxID: string,
+    file: string,
+    tool: string,
+  ): Promise<{ allowed: boolean; reason?: string }> {
+    const hookOutput = await Plugin.trigger(
+      "sandbox.edit.before",
+      {
+        sandboxID,
+        file,
+        tool,
+      },
+      {
+        allowed: true,
+        reason: undefined,
+      },
+    )
+
+    return {
+      allowed: hookOutput.allowed,
+      reason: hookOutput.reason,
+    }
   }
 
   /**

@@ -131,18 +131,18 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 |------|--------|-------|
 | sandbox.create.before | complete | Pre-create hook - triggers in SandboxService.create() |
 | sandbox.ready | complete | Sandbox ready hook - triggers in SandboxService.create() |
-| sandbox.edit.before | complete | Hook defined in plugin, needs service integration |
-| prompt.typing | complete | Hook defined in plugin, needs service integration |
+| sandbox.edit.before | complete | Hook triggers via SandboxService.checkEditAllowed() |
+| prompt.typing | complete | Hook triggers via SandboxService.onTyping() with warmup hints |
 | background.spawn | complete | Agent spawn hook - triggers in BackgroundService.spawn() |
 | multiplayer.join | complete | User join hook - triggers in MultiplayerService.join() |
 | voice.transcribed | complete | Voice processing - triggers in VoiceService.sendVoicePrompt() |
-| pr.screenshot | complete | Hook defined in plugin, needs service integration |
+| pr.screenshot | complete | Hook triggers via PRSessionService.captureScreenshot() |
 | pr.comment.received | complete | PR comment hook - triggers in PRSessionService.addComment() |
 | pr.comment.addressed | complete | Comment resolution - triggers in PRSessionService.respond() |
 | desktop.started | complete | Desktop started hook - triggers in DesktopService.start() |
-| stats.prompt.sent | complete | Hook defined in plugin, needs service integration |
-| skill.invoke.before | complete | Hook defined in plugin, needs service integration |
-| skill.invoke.after | complete | Hook defined in plugin, needs service integration |
+| stats.prompt.sent | complete | Hook triggers in LLM.stream() for prompt statistics |
+| skill.invoke.before | complete | Hook triggers in SkillTool.execute() before loading |
+| skill.invoke.after | complete | Hook triggers in SkillTool.execute() after loading |
 
 ---
 
@@ -288,3 +288,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | OpenTelemetry environment flags | complete | Added OTEL_ENABLED, OTEL_EXPORTER_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_SAMPLE_RATE, OTEL_SERVICE_NAME flags |
 | 2026-01-14 | OpenTelemetry initialization | complete | Integrated telemetry in application startup with Flag config, added graceful shutdown |
 | 2026-01-14 | HostedConfig schema | complete | Added full Hosted config schema (sandbox, multiplayer, background, skills, voice, integrations) to config.ts |
+| 2026-01-14 | Plugin hooks full integration | complete | Integrated remaining hooks: sandbox.edit.before (checkEditAllowed), prompt.typing (onTyping with warmup hints), pr.screenshot (captureScreenshot), stats.prompt.sent (LLM.stream), skill.invoke.before/after (SkillTool) |

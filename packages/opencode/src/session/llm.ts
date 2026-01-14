@@ -55,6 +55,17 @@ export namespace LLM {
       modelID: input.model.id,
       providerID: input.model.providerID,
     })
+
+    // Trigger stats.prompt.sent hook for tracking prompt statistics
+    await Plugin.trigger(
+      "stats.prompt.sent",
+      {
+        sessionID: input.sessionID,
+        userID: input.user.id,
+        repository: Instance.project.id,
+      },
+      {},
+    )
     const [language, cfg] = await Promise.all([Provider.getLanguage(input.model), Config.get()])
 
     const system = SystemPrompt.header(input.model.providerID)

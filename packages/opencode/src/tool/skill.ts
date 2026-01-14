@@ -4,6 +4,7 @@ import { Tool } from "./tool"
 import { Skill } from "../skill"
 import { ConfigMarkdown } from "../config/markdown"
 import { PermissionNext } from "../permission/next"
+import { Plugin } from "../plugin"
 
 const parameters = z.object({
   name: z.string().describe("The skill identifier from available_skills (e.g., 'code-review' or 'category/helper')"),
@@ -55,12 +56,53 @@ export const SkillTool = Tool.define("skill", async (ctx) => {
         always: [params.name],
         metadata: {},
       })
+
+      // Trigger skill.invoke.before hook
+      const beforeHookOutput = await Plugin.trigger(
+        "skill.invoke.before",
+        {
+          skillName: params.name,
+          sessionID: ctx.sessionID,
+          context: undefined,
+        },
+        {
+          modifiedPrompt: undefined,
+          skip: false,
+        },
+      )
+
       // Load and parse skill content
       const parsed = await ConfigMarkdown.parse(skill.location)
       const dir = path.dirname(skill.location)
 
+      // If plugin requests to skip, return early
+      if (beforeHookOutput.skip) {
+        return {
+          title: `Skill "${params.name}" skipped by plugin`,
+          output: "Skill execution was skipped by a plugin hook.",
+          metadata: {
+            name: params.name,
+            dir,
+          },
+        }
+      }
+
+      // Use modified prompt if provided by plugin
+      const content = beforeHookOutput.modifiedPrompt ?? parsed.content.trim()
+
       // Format output similar to plugin pattern
-      const output = [`## Skill: ${skill.name}`, "", `**Base directory**: ${dir}`, "", parsed.content.trim()].join("\n")
+      const output = [`## Skill: ${skill.name}`, "", `**Base directory**: ${dir}`, "", content].join("\n")
+
+      // Trigger skill.invoke.after hook
+      await Plugin.trigger(
+        "skill.invoke.after",
+        {
+          skillName: params.name,
+          sessionID: ctx.sessionID,
+          result: output,
+        },
+        {},
+      )
 
       return {
         title: `Loaded skill: ${skill.name}`,

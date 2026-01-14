@@ -317,4 +317,43 @@ export namespace PRSessionService {
     }
     return undefined
   }
+
+  /**
+   * Capture a screenshot for PR description.
+   * Triggers the pr.screenshot hook to allow plugins to capture/upload screenshots.
+   *
+   * @param sandboxID - The sandbox ID where the screenshot will be taken
+   * @param prURL - The PR URL for context
+   * @param type - Whether this is a "before" or "after" screenshot
+   * @returns Screenshot URL if captured, or undefined if not included
+   */
+  export async function captureScreenshot(
+    sandboxID: string,
+    prURL: string,
+    type: "before" | "after",
+  ): Promise<{ screenshotUrl?: string; include: boolean }> {
+    log.info("capturing PR screenshot", { sandboxID, prURL, type })
+
+    const hookOutput = await Plugin.trigger(
+      "pr.screenshot",
+      {
+        sandboxID,
+        prURL,
+        type,
+      },
+      {
+        screenshotUrl: undefined,
+        include: false,
+      },
+    )
+
+    if (hookOutput.include && hookOutput.screenshotUrl) {
+      log.info("PR screenshot captured", { sandboxID, type, url: hookOutput.screenshotUrl })
+    }
+
+    return {
+      screenshotUrl: hookOutput.screenshotUrl,
+      include: hookOutput.include,
+    }
+  }
 }

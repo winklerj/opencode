@@ -593,12 +593,14 @@ export const SandboxRoute = new Hono()
       z.object({
         repository: z.string().describe("Repository URL to warm sandbox for"),
         projectID: z.string().describe("Project ID to warm sandbox for"),
+        sessionID: z.string().optional().describe("Optional session ID for hook context"),
+        partialPrompt: z.string().optional().describe("Optional partial prompt for warmup hints"),
         imageTag: z.string().optional().describe("Optional specific image tag"),
       }),
     ),
     async (c) => {
-      const { repository, projectID, imageTag } = c.req.valid("json")
-      await SandboxService.onTyping(repository, projectID, imageTag)
+      const { repository, projectID, sessionID, partialPrompt, imageTag } = c.req.valid("json")
+      await SandboxService.onTyping(repository, projectID, sessionID ?? "", partialPrompt ?? "", imageTag)
       return c.json({ success: true })
     },
   )
