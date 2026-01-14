@@ -779,6 +779,168 @@ export namespace Config {
       ref: "ServerConfig",
     })
 
+  /**
+   * Configuration for hosted background coding agents.
+   * See SPECIFICATION.md Section 7 for full details.
+   */
+  export const Hosted = z
+    .object({
+      enabled: z.boolean().default(false).describe("Enable hosted background agent features"),
+
+      sandbox: z
+        .object({
+          provider: z.enum(["modal", "local"]).default("modal").describe("Sandbox provider"),
+          defaultImage: z.string().optional().describe("Default container image for sandboxes"),
+          services: z.array(z.string()).default(["vite"]).describe("Services to run in sandbox"),
+          warmPool: z
+            .object({
+              enabled: z.boolean().default(true).describe("Enable warm pool"),
+              size: z.number().default(3).describe("Number of warm sandboxes to maintain"),
+              ttl: z.number().default(1800).describe("Time-to-live for warm sandboxes in seconds"),
+              typingTrigger: z.boolean().default(true).describe("Warm sandbox on keystroke"),
+            })
+            .optional(),
+          resources: z
+            .object({
+              cpu: z.number().default(2).describe("CPU cores"),
+              memory: z.number().default(4096).describe("Memory in MB"),
+              disk: z.number().default(20).describe("Disk space in GB"),
+            })
+            .optional(),
+          editor: z
+            .object({
+              enabled: z.boolean().default(true).describe("Enable VS Code in sandbox"),
+              type: z.enum(["code-server", "openvscode-server"]).default("code-server"),
+              port: z.number().default(8080),
+              extensions: z.array(z.string()).optional().describe("Pre-installed extensions"),
+            })
+            .optional(),
+          desktop: z
+            .object({
+              enabled: z.boolean().default(false).describe("Enable desktop streaming"),
+              resolution: z
+                .object({
+                  width: z.number().default(1280),
+                  height: z.number().default(720),
+                })
+                .optional(),
+              vncPort: z.number().default(5900),
+            })
+            .optional(),
+          imageBuild: z
+            .object({
+              rebuildInterval: z.number().default(1800).describe("Rebuild interval in seconds"),
+              runTestsDuringBuild: z.boolean().default(true),
+              testTimeout: z.number().default(600000).describe("Test timeout in ms"),
+              cacheWarmup: z.boolean().default(true),
+            })
+            .optional(),
+        })
+        .optional()
+        .describe("Sandbox configuration for hosted agents"),
+
+      multiplayer: z
+        .object({
+          enabled: z.boolean().default(false).describe("Enable multiplayer sessions"),
+          stateProvider: z.enum(["cloudflare", "memory"]).default("memory"),
+        })
+        .optional(),
+
+      background: z
+        .object({
+          enabled: z.boolean().default(true).describe("Enable background agents"),
+          maxConcurrent: z.number().default(Infinity).describe("Max concurrent sessions"),
+          defaultTimeout: z.number().default(600000).describe("Default timeout in ms"),
+        })
+        .optional(),
+
+      skills: z
+        .object({
+          enabled: z.boolean().default(true).describe("Enable skills system"),
+          directory: z.string().default(".opencode/skills").describe("Skills directory"),
+          builtIn: z
+            .array(z.string())
+            .default(["code-review", "pr-description", "test-generation"])
+            .describe("Built-in skills to enable"),
+          custom: z
+            .array(
+              z.object({
+                name: z.string(),
+                description: z.string(),
+                prompt: z.string(),
+                tools: z.array(z.string()).optional(),
+                model: z.string().optional(),
+              })
+            )
+            .optional(),
+        })
+        .optional()
+        .describe("Skills configuration"),
+
+      voice: z
+        .object({
+          enabled: z.boolean().default(false).describe("Enable voice interface"),
+          lang: z.string().default("en-US"),
+          continuous: z.boolean().default(true),
+          interimResults: z.boolean().default(true),
+          commitDelay: z.number().default(250).describe("Delay before finalizing speech in ms"),
+        })
+        .optional(),
+
+      integrations: z
+        .object({
+          github: z
+            .object({
+              enabled: z.boolean(),
+              webhooks: z
+                .object({
+                  secret: z.string(),
+                  events: z.array(z.string()),
+                })
+                .optional(),
+              appId: z.string().optional().describe("GitHub App ID for image building"),
+              appPrivateKey: z.string().optional(),
+              appInstallationId: z.string().optional(),
+            })
+            .optional(),
+          slack: z
+            .object({
+              enabled: z.boolean(),
+              botToken: z.string(),
+              signingSecret: z.string().optional(),
+              classifier: z
+                .object({
+                  model: z.string().default("gpt-4o-mini"),
+                  confidenceThreshold: z.number().default(0.8),
+                  allowUnknown: z.boolean().default(true),
+                  hints: z
+                    .array(
+                      z.object({
+                        channelPattern: z.string(),
+                        repository: z.string(),
+                        keywords: z.array(z.string()).optional(),
+                      })
+                    )
+                    .optional(),
+                })
+                .optional(),
+            })
+            .optional(),
+          sentry: z.object({ enabled: z.boolean(), dsn: z.string() }).optional(),
+          datadog: z.object({ enabled: z.boolean(), apiKey: z.string() }).optional(),
+          launchDarkly: z.object({ enabled: z.boolean(), sdkKey: z.string() }).optional(),
+          braintrust: z.object({ enabled: z.boolean(), apiKey: z.string() }).optional(),
+          buildkite: z.object({ enabled: z.boolean(), token: z.string() }).optional(),
+        })
+        .optional()
+        .describe("Integration configurations"),
+    })
+    .strict()
+    .meta({
+      ref: "HostedConfig",
+    })
+  export type Hosted = z.infer<typeof Hosted>
+
   export const Layout = z.enum(["auto", "stretch"]).meta({
     ref: "LayoutConfig",
   })
@@ -993,6 +1155,7 @@ export namespace Config {
           url: z.string().optional().describe("Enterprise URL"),
         })
         .optional(),
+      hosted: Hosted.optional().describe("Hosted background agent configuration"),
       compaction: z
         .object({
           auto: z.boolean().optional().describe("Enable automatic compaction when context is full (default: true)"),

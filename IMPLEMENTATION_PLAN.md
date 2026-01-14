@@ -287,3 +287,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Fix typecheck script error | complete | Excluded script/build.ts from tsconfig to avoid missing @opentui/solid module error |
 | 2026-01-14 | OpenTelemetry environment flags | complete | Added OTEL_ENABLED, OTEL_EXPORTER_TYPE, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_SAMPLE_RATE, OTEL_SERVICE_NAME flags |
 | 2026-01-14 | OpenTelemetry initialization | complete | Integrated telemetry in application startup with Flag config, added graceful shutdown |
+| 2026-01-14 | HostedConfig schema | complete | Added full Hosted config schema (sandbox, multiplayer, background, skills, voice, integrations) to config.ts |
