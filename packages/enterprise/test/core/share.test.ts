@@ -3,7 +3,10 @@ import { Share } from "../../src/core/share"
 import { Storage } from "../../src/core/storage"
 import { Identifier } from "@opencode-ai/util/identifier"
 
-describe("core.share", () => {
+// Skip tests if storage adapter is not configured (requires env vars)
+const hasStorage = !!process.env.OPENCODE_STORAGE_ADAPTER
+
+describe.skipIf(!hasStorage)("core.share", () => {
   test("should create a share", async () => {
     const sessionID = Identifier.descending()
     const share = await Share.create({ sessionID })
