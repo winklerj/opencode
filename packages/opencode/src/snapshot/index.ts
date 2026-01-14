@@ -197,3 +197,5 @@ export namespace Snapshot {
     return path.join(Global.Path.data, "snapshot", project.id)
   }
 }
+
+export { SnapshotLifecycle } from "./lifecycle"

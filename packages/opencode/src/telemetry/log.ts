@@ -160,6 +160,7 @@ export const EventNames = {
   SANDBOX_GIT_SYNC_FAILED: "sandbox.git.sync.failed",
   SANDBOX_SNAPSHOT_CREATED: "sandbox.snapshot.created",
   SANDBOX_SNAPSHOT_RESTORED: "sandbox.snapshot.restored",
+  SANDBOX_SNAPSHOT_CLEANED: "sandbox.snapshot.cleaned",
   SANDBOX_SERVICE_READY: "sandbox.service.ready",
   SANDBOX_TERMINATED: "sandbox.terminated",
 

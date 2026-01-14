@@ -17,6 +17,7 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | Image builder | complete | - | 30-min rebuild cycle, parallel builds, event emission |
 | Image registry | complete | - | Tagging strategy with latest tracking, cleanup, stats |
 | Snapshot manager | complete | SandboxSnapshot.tla | SnapshotManager with TTL expiration |
+| Snapshot lifecycle | complete | SandboxSnapshot.tla | SnapshotLifecycle for session continuity with auto-snapshot and restore |
 | Git sync gating | complete | GitSyncGating.tla | SyncGate blocks writes until synced |
 
 ### 1.2 Background Agent Package (`packages/background/`)
@@ -291,3 +292,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-14 | Plugin hooks full integration | complete | Integrated remaining hooks: sandbox.edit.before (checkEditAllowed), prompt.typing (onTyping with warmup hints), pr.screenshot (captureScreenshot), stats.prompt.sent (LLM.stream), skill.invoke.before/after (SkillTool) |
 | 2026-01-14 | Event bus definitions | complete | Added 30+ missing EventNames from SPECIFICATION.md section 11 (background.*, multiplayer.*, voice.*, desktop.*, editor.*, stats.*, warmpool.*, pr.* events); extended EventDomain with background, voice, desktop, editor, stats, warmpool |
 | 2026-01-14 | BackgroundService sandbox integration | complete | Integrated BackgroundService with SandboxService for real sandbox creation; added agent sandbox config caching; connected onInitialize to warm pool claims and sandbox creation; connected onRun to sandbox command execution |
+| 2026-01-14 | SnapshotLifecycle orchestration | complete | Added SnapshotLifecycle module (packages/opencode/src/snapshot/lifecycle.ts) for session continuity; implements onAgentComplete (auto-snapshot), onFollowUpPrompt (restore or cold start), cleanupExpiredSnapshots; listens to session.idle events; includes 4 tests |
