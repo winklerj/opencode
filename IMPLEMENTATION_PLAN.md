@@ -174,12 +174,12 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 ### 4.4 Web Interface Extensions
 | Task | Status | Notes |
 |------|--------|-------|
-| VSCodeEmbed component | pending | code-server iframe |
-| DesktopStream component | pending | VNC/noVNC stream |
-| PresenceAvatars component | pending | Multiplayer presence |
-| PromptQueue component | pending | Queue management |
-| StatsDashboard component | pending | Usage metrics |
-| VoiceInput component | pending | Voice-to-text |
+| VSCodeEmbed component | complete | code-server iframe with toolbar, fullscreen, error states |
+| DesktopStream component | complete | VNC/noVNC stream with WebSocket, screenshot, resolution options |
+| PresenceAvatars component | complete | Multiplayer presence with cursor indicators, edit lock badges |
+| PromptQueue component | complete | Queue management with drag reorder, cancel, priority display |
+| StatsDashboard component | complete | Usage metrics with live/historical data, model/agent breakdown |
+| VoiceInput component | complete | Voice-to-text with waveform, auto-submit, modal mode |
 | Mobile responsive layout | pending | PWA support |
 
 ---
@@ -260,3 +260,4 @@ This document tracks the implementation progress of the OpenCode hosted backgrou
 | 2026-01-13 | Durable Object state | complete | DurableObjectStateStore with SQL/KV modes, DurableObjectStateStoreClient, MultiplayerDurableObject base class |
 | 2026-01-13 | Slack Bot Client | complete | WebhookHandler, RepositoryClassifier, ThreadManager, BlockKit UI with 75 tests |
 | 2026-01-14 | Chrome Extension Client | complete | DOM/React tree extractor, SelectionOverlay, content script, background service worker, 48 tests |
+| 2026-01-14 | Web Interface Extensions | complete | VSCodeEmbed, DesktopStream, PresenceAvatars, PromptQueue, StatsDashboard, VoiceInput components |
